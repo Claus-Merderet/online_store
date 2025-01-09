@@ -1,0 +1,82 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: API Documentation
+            version: 1.0.0
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+        paths:
+            /api/auth/token/refresh:
+                post:
+                    tags:
+                        - User
+                    summary: Refresh JWT token
+                    description: "Обновляет истёкший JWT токен с использованием refresh token."
+                    requestBody:
+                        description: Refresh token data
+                        required: true
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    properties:
+                                        refresh_token:
+                                            type: string
+                                            description: "Refresh токен"
+                    responses:
+                        '200':
+                            description: "Токен успешно обновлён"
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            token:
+                                                type: string
+                                                description: "Новый JWT токен"
+                        '401':
+                            description: "Unauthorized"
+
+            /api/auth/token/login:
+                post:
+                    tags:
+                        - User
+                    summary: User login
+                    description: "Generation of JWT tokens after successful authentication."
+                    requestBody:
+                        description: User credentials. Identifier is phone number or email.
+                        required: true
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    properties:
+                                        identifier:
+                                            type: string
+                                            description: "Phone or email"
+                                        password:
+                                            type: string
+                                            description: "Password"
+                    responses:
+                        '200':
+                            description: "Authentication was successful"
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            token:
+                                                type: string
+                                                description: "Access token"
+                                            refresh_token:
+                                                type: string
+                                                description: "Refresh token"
+                        '500':
+                            description: "User with this credential not found"
+    areas:
+        path_patterns:
+            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
