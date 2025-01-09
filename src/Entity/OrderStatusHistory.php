@@ -14,7 +14,7 @@ class OrderStatusHistory
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private int $id;
 
     #[ORM\ManyToOne(inversedBy: 'orderStatusHistories')]
     #[ORM\JoinColumn(nullable: false)]
@@ -32,7 +32,7 @@ class OrderStatusHistory
     #[ORM\ManyToOne(inversedBy: 'orderStatusHistories')]
     private ?User $changedBy = null;
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }

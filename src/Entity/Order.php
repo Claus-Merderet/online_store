@@ -16,7 +16,7 @@ class Order
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private readonly int $id;
 
     #[ORM\Column(enumType: NotificationType::class)]
     private ?NotificationType $notificationType = null;
@@ -58,7 +58,7 @@ class Order
         $this->orderProducts = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -87,12 +87,12 @@ class Order
         return $this;
     }
 
-    public function getaddress(): ?string
+    public function getAddress(): ?string
     {
         return $this->address;
     }
 
-    public function set�address(?string $address): static
+    public function setAddress(?string $address): static
     {
         $this->address = $address;
 
@@ -155,28 +155,6 @@ class Order
         return $this->orderStatusHistories;
     }
 
-    public function addOrderStatusHistory(OrderStatusHistory $orderStatusHistory): static
-    {
-        if (!$this->orderStatusHistories->contains($orderStatusHistory)) {
-            $this->orderStatusHistories->add($orderStatusHistory);
-            $orderStatusHistory->setOrderId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeOrderStatusHistory(OrderStatusHistory $orderStatusHistory): static
-    {
-        if ($this->orderStatusHistories->removeElement($orderStatusHistory)) {
-            // set the owning side to null (unless already changed)
-            if ($orderStatusHistory->getOrderId() === $this) {
-                $orderStatusHistory->setOrderId(null);
-            }
-        }
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, OrderProducts>
      */
@@ -185,25 +163,5 @@ class Order
         return $this->orderProducts;
     }
 
-    public function addOrderProduct(OrderProducts $orderProduct): static
-    {
-        if (!$this->orderProducts->contains($orderProduct)) {
-            $this->orderProducts->add($orderProduct);
-            $orderProduct->setOrderId($this);
-        }
 
-        return $this;
-    }
-
-    public function removeOrderProduct(OrderProducts $orderProduct): static
-    {
-        if ($this->orderProducts->removeElement($orderProduct)) {
-            // set the owning side to null (unless already changed)
-            if ($orderProduct->getOrderId() === $this) {
-                $orderProduct->setOrderId(null);
-            }
-        }
-
-        return $this;
-    }
 }

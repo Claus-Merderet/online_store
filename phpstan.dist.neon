@@ -1,8 +1,9 @@
 parameters:
     level: 6
     paths:
-        - bin/
-        - config/
-        - public/
         - src/
         - tests/
+services:
+    -
+        class: App\PHPStan\Rules\DeclareStrictTypesRule
+        tags: [phpstan.rules.rule]

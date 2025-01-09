@@ -16,3 +16,5 @@ migrate:
 	make symfony cmd="doctrine:migrations:migrate"
 migration:
 	make symfony cmd="make:migration"
+analyse:
+	vendor/bin/phpstan analyse
