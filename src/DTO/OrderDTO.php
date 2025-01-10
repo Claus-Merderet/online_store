@@ -8,6 +8,5 @@ class OrderDTO
 {
     public function __construct()
     {
-
     }
 }
