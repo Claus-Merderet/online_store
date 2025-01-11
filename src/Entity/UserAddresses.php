@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Entity;
 
@@ -16,7 +16,7 @@ class UserAddresses
 
     #[ORM\ManyToOne(inversedBy: 'userAddresses')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    private User $user;
 
     #[ORM\Column(nullable: true)]
     private ?int $kladrId = null;

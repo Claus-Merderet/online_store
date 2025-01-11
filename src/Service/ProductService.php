@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Service;
 
@@ -100,9 +100,13 @@ readonly class ProductService
         ];
     }
 
+    /**
+     * @param Product[] $products
+     * @return ProductDTO[]
+     */
     public function mapProductsToDTO(array $products): array
     {
-        return array_map(function ($product) {
+        return array_map(function (Product $product): ProductDTO {
             $measurements = new MeasurementsDTO(
                 $product->getWeight(),
                 $product->getHeight(),

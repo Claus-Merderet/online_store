@@ -1,9 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Security;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
@@ -36,8 +37,12 @@ readonly class UserProvider implements UserProviderInterface
         return $user;
     }
 
-    public function refreshUser(UserInterface $user): UserInterface
+    public function refreshUser(UserInterface $user): User
     {
+        if (!$user instanceof User) {
+            throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
+        }
+
         return $user;
     }
 

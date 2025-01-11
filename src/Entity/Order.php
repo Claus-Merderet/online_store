@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Entity;
 
@@ -16,14 +16,14 @@ class Order
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private readonly int $id;
+    private ?int $id = null;
 
     #[ORM\Column(enumType: NotificationType::class)]
-    private ?NotificationType $notificationType = null;
+    private NotificationType $notificationType;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    private User $user;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $address = null;
@@ -38,7 +38,7 @@ class Order
     private ?string $userEmail = null;
 
     #[ORM\Column(enumType: DeliveryType::class)]
-    private ?DeliveryType $deliveryType = null;
+    private DeliveryType $deliveryType;
 
     /**
      * @var Collection<int, OrderStatusHistory>

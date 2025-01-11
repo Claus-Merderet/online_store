@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Entity;
 
@@ -28,13 +28,13 @@ class User implements AuthUserInterface
     private ?int $id = null;
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Role $role = null;
-    #[ORM\Column(length: 255, unique: true)]
+    private Role $role;
+    #[ORM\Column(length: 255, unique: true, nullable: true)]
     #[Assert\Email]
     private ?string $email = null;
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $birthday = null;
-    #[ORM\Column(length: 15, unique: true)] // TODO: сделать уникальным
+    #[ORM\Column(length: 15, unique: true, nullable: true)] // TODO: сделать уникальным
     private ?string $phone = null;
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $name = null;
@@ -116,5 +116,19 @@ class User implements AuthUserInterface
     public function getUserIdentifier(): string
     {
         return !empty($this->email) ? $this->email : $this->phone;
+    }
+    /**
+     * @param  Collection<int, UserAddresses> $userAddresses
+     */
+    public function setUserAddresses(Collection $userAddresses): void
+    {
+        $this->userAddresses = $userAddresses;
+    }
+    /**
+     * @param  Collection<int, Order> $orders
+     */
+    public function setOrders(Collection $orders): void
+    {
+        $this->orders = $orders;
     }
 }

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Entity;
 
@@ -14,17 +14,17 @@ class OrderStatusHistory
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private int $id;
+    private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'orderStatusHistories')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Order $order = null;
+    private Order $order;
 
     #[ORM\Column(enumType: StatusName::class)]
-    private ?StatusName $statusName = null;
+    private StatusName $statusName;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
-    private ?\DateTimeInterface $createdAt = null;
+    private \DateTimeInterface $createdAt;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $comment = null;

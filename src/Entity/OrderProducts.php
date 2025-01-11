@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Entity;
 
@@ -12,39 +12,39 @@ class OrderProducts
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private readonly int $id;
+    private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'orderProducts')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Order $order = null;
+    private Order $order;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Product $product = null;
+    private Product $product;
 
     #[ORM\Column(length: 255)]
-    private ?string $productName = null;
+    private string $productName;
 
     #[ORM\Column]
-    private ?int $price = null;
+    private int $price;
 
     #[ORM\Column]
-    private ?int $amount = null;
+    private int $amount;
 
     #[ORM\Column]
-    private ?int $height = null;
+    private int $height;
 
     #[ORM\Column]
-    private ?int $weight = null;
+    private int $weight;
 
     #[ORM\Column]
-    private ?int $length = null;
+    private int $length;
 
     #[ORM\Column]
-    private ?int $tax = null;
+    private int $tax;
 
     #[ORM\Column]
-    private ?int $version = null;
+    private int $version;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;

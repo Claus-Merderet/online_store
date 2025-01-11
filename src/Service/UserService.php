@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Service;
 
@@ -26,7 +26,8 @@ readonly class UserService
         private JWTTokenManagerInterface $JWTTokenManager,
         private RefreshTokenGeneratorInterface $refreshTokenGenerator,
         private RefreshTokenManagerInterface $refreshTokenManager,
-    ) {}
+    ) {
+    }
 
     public function registerUser(RegisterUserDTO $registerUserDTO): User
     {

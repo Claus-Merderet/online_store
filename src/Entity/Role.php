@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Entity;
 
@@ -12,10 +12,10 @@ class Role
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private int $id;
+    private ?int $id = null;
 
-    #[ORM\Column(length: 100)]
-    private ?string $roleName = null;
+    #[ORM\Column(length: 100, nullable: false)]
+    private string $roleName;
 
     public function getId(): int
     {

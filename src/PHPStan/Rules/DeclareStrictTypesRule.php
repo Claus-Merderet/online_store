@@ -1,56 +1,65 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace App\PHPStan\Rules;
 
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
+use PHPStan\Node\FileNode;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
+use PHPStan\ShouldNotHappenException;
 
+/**
+ * @implements Rule<FileNode>
+ */
 class DeclareStrictTypesRule implements Rule
 {
-    private bool $hasStrictTypesDeclared = false;
-    private array $processedFiles = [];
-
+    private const EXCLUDED_FILES = [
+        'src/Kernel.php',
+        'tests/bootstrap.php',
+    ];
     public function getNodeType(): string
     {
-        return Node::class; // Проверяем все узлы
+        return FileNode::class;
     }
 
+    /**
+     * @param  FileNode $node
+     * @throws ShouldNotHappenException
+     */
     public function processNode(Node $node, Scope $scope): array
     {
-        // Проверяем, что узел находится в пределах первых 3 строк
-        if ($node->getLine() > 3) {
-            return []; // Пропускаем узлы после третьей строки
-        }
+        $currentFile = $scope->getFile();
 
-        // Если файл уже обработан, не генерируем ошибку снова
-        $filePath = $node->getAttribute('file') ?? '';
-        if (in_array($filePath, $this->processedFiles)) {
+        // Исключение определённых файлов из проверки
+        foreach (self::EXCLUDED_FILES as $excludedFile) {
+            if (str_contains($currentFile, $excludedFile)) {
+                return [];
+            }
+        }
+        $nodes = $node->getNodes();
+
+        if (count($nodes) === 0) {
             return [];
         }
 
-        // Проверяем, является ли узел корневым узлом (например, началом файла)
-        if ($node instanceof Node\Stmt\Declare_) {
-            foreach ($node->declares as $declare) {
-                if ($declare->key->toString() === 'strict_types') {
-                    $this->hasStrictTypesDeclared = true;
-                    $this->processedFiles[] = $filePath; // Добавляем файл в список обработанных
-                    return []; // Если declare(strict_types=1) найдено, пропускаем
+        $firstNode = array_shift($nodes);
+        if ($firstNode instanceof Node\Stmt\Declare_) {
+            foreach ($firstNode->declares as $declare) {
+                if (
+                    'strict_types' === $declare->key->toLowerString()
+                    && $declare->value instanceof Node\Scalar\LNumber
+                    && 1 === $declare->value->value
+                ) {
+                    return [];
                 }
             }
         }
 
-        // Если strict_types не найден в первых трех строках, возвращаем ошибку
-        if (!$this->hasStrictTypesDeclared && $node->getLine() <= 3) {
-            $this->processedFiles[] = $filePath; // Добавляем файл в список обработанных
-            return [
-                RuleErrorBuilder::message('Missing "declare(strict_types=1);" at the beginning of the file.')->build(),
-            ];
-        }
-
-        return [];
+        return [
+            RuleErrorBuilder::message('PHP files should declare strict types.')
+                ->identifier('worksome.declareStrictTypes')
+                ->build(),
+        ];
     }
 }
