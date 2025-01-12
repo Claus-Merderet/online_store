@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
 
@@ -71,7 +73,10 @@ readonly class UserService
         }
 
         if (!empty($dto->phone) && $this->userRepository->findByPhone($dto->phone)) {
-            return new JsonResponse(['error' => 'User with this phone number already exists.'], Response::HTTP_CONFLICT);
+            return new JsonResponse(
+                ['error' => 'User with this phone number already exists.'],
+                Response::HTTP_CONFLICT
+            );
         }
 
         return null;
@@ -87,7 +92,9 @@ readonly class UserService
             ];
         }
 
-        return new JsonResponse(['error' => 'Validation failed', 'errors' => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
+        return new JsonResponse(
+            ['error' => 'Validation failed', 'errors' => $errors],
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        );
     }
-
 }

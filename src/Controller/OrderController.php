@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller;
 
@@ -11,5 +13,4 @@ class OrderController extends AbstractController
     {
         //$productDTO = new OrederDTO(json_decode($request->getContent(), true));
     }
-
 }

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller;
 
@@ -19,9 +21,9 @@ use Symfony\Component\Routing\Annotation\Route;
 class UserController extends AbstractController
 {
     public function __construct(
-        private readonly UserService         $userService,
+        private readonly UserService $userService,
         private readonly NotificationService $notificationService,
-        private readonly UserFetcher         $userFetcher
+        private readonly UserFetcher $userFetcher
     ) {
     }
 
@@ -118,10 +120,10 @@ class UserController extends AbstractController
 
     #[Route('/api/users/logout', name: 'api_user_logout', methods: ['POST'])]
     public function logoutUser(): JsonResponse
-    {   //TODO: не работает
+    {
         //$resp = $this->security->logout();
+        //TODO: не работает. похоже не нужно, фронт просто будет забывать accessToken и refreshToken или все же нет
 
         return new JsonResponse(Response::HTTP_OK);
-    }//TODO: похоже не нужно, фронт просто будет забывать accessToken и refreshToken или все же нет
-
+    }
 }

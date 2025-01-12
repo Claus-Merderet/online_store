@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
 
@@ -45,7 +47,10 @@ readonly class ProductService
             ];
         }
 
-        return new JsonResponse(['error' => 'Validation failed', 'errors' => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
+        return new JsonResponse(
+            ['error' => 'Validation failed', 'errors' => $errors],
+            Response::HTTP_UNPROCESSABLE_ENTITY
+        );
     }
 
     public function createProduct(ProductDTO $productDTO): Product

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller;
 
@@ -57,11 +59,17 @@ class ProductController extends AbstractController
             return $validationErrors;
         }
         if ($this->productService->productExists($productDTO->id)) {
-            return new JsonResponse(['error' => 'Product with this ID already exists: ' . $productDTO->id], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                ['error' => 'Product with this ID already exists: ' . $productDTO->id],
+                Response::HTTP_BAD_REQUEST
+            );
         }
         $product = $this->productService->createProduct($productDTO);
 
-        return new JsonResponse(['message' => 'Product created successfully', 'id' => $product->getId()], Response::HTTP_CREATED);
+        return new JsonResponse(
+            ['message' => 'Product created successfully', 'id' => $product->getId()],
+            Response::HTTP_CREATED
+        );
     }
 
     #[Route('/api/products', name: 'product_update', methods: ['PUT'])]
@@ -80,10 +88,16 @@ class ProductController extends AbstractController
         $product = $this->productService->findProduct($productDTO->id);
 
         if (!$product) {
-            return new JsonResponse(['error' => 'Product not found', 'id' => $productDTO->id], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(
+                ['error' => 'Product not found', 'id' => $productDTO->id],
+                Response::HTTP_BAD_REQUEST
+            );
         }
         $this->productService->updateProduct($product, $productDTO);
 
-        return new JsonResponse(['message' => 'Product updated successfully'], Response::HTTP_ACCEPTED);
+        return new JsonResponse(
+            ['message' => 'Product updated successfully'],
+            Response::HTTP_ACCEPTED
+        );
     }
 }

@@ -38,3 +38,8 @@ phpstan.neon
 ###< friendsofphp/php-cs-fixer ###
 /.env.dev
 /.env.test
+
+###> squizlabs/php_codesniffer ###
+/.phpcs-cache
+/phpcs.xml
+###< squizlabs/php_codesniffer ###
