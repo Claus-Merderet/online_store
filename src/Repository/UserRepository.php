@@ -29,10 +29,12 @@ class UserRepository extends ServiceEntityRepository
     {
         return $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
     }
+
     public function findByPhone(string $phone): User|null
     {
         return $this->entityManager->getRepository(User::class)->findOneBy(['phone' => $phone]);
     }
+
     public function findById(string $id): User|null
     {
         return $this->entityManager->getRepository(User::class)->find($id);

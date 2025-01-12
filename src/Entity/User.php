@@ -11,7 +11,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -24,32 +23,41 @@ class User implements AuthUserInterface
     #[Assert\Uuid(message: 'Invalid promoId. It must be a valid UUID.')]
     #[ORM\Column(type: 'string', length: 36, nullable: true)]
     public ?string $promoId = null;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private Role $role;
+
     #[ORM\Column(length: 255, unique: true, nullable: true)]
     #[Assert\Email]
     private ?string $email = null;
+
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $birthday = null;
+
     #[ORM\Column(length: 15, unique: true, nullable: true)] // TODO: сделать уникальным
     private ?string $phone = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $name = null;
+
     #[ORM\Column(length: 64)]
     private string $password;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
+
     /**
      * @var Collection<int, UserAddresses>
      */
     #[ORM\OneToMany(targetEntity: UserAddresses::class, mappedBy: 'userId', orphanRemoval: true)]
     private Collection $userAddresses;
+
     /**
      * @var Collection<int, Order>
      */
@@ -85,6 +93,7 @@ class User implements AuthUserInterface
     {
         return $this->email;
     }
+
     public function getPassword(): string
     {
         return $this->password;
@@ -119,6 +128,7 @@ class User implements AuthUserInterface
     {
         return !empty($this->email) ? $this->email : $this->phone;
     }
+
     /**
      * @param  Collection<int, UserAddresses> $userAddresses
      */
@@ -126,6 +136,7 @@ class User implements AuthUserInterface
     {
         $this->userAddresses = $userAddresses;
     }
+
     /**
      * @param  Collection<int, Order> $orders
      */

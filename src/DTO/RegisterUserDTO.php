@@ -19,7 +19,7 @@ class RegisterUserDTO
     #[Assert\NotBlank(message: 'The password field is required.')]
     #[Assert\Regex(
         pattern: '/^(?=.*[!@#$%^&*(),.?":{}|<>]).{7,}$/',
-        message: 'The password must be at least 7 characters long and contain at least one special character.'
+        message: 'The password must be at least 7 characters long and contain at least one special character.',
     )]
     public string $password;
 

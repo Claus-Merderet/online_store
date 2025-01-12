@@ -20,6 +20,7 @@ class DeclareStrictTypesRule implements Rule
         'src/Kernel.php',
         'tests/bootstrap.php',
     ];
+
     public function getNodeType(): string
     {
         return FileNode::class;

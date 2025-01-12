@@ -20,6 +20,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 readonly class UserService
 {
     private const REFRESH_TOKEN_LIVE = 3600;
+
     public function __construct(
         private UserRepository $userRepository,
         private RoleRepository $roleRepository,
@@ -51,7 +52,7 @@ readonly class UserService
         $accessToken = $this->JWTTokenManager->create($user);
         $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl(
             $user,
-            self::REFRESH_TOKEN_LIVE
+            self::REFRESH_TOKEN_LIVE,
         );
         $this->refreshTokenManager->save($refreshToken);
 
@@ -75,7 +76,7 @@ readonly class UserService
         if (!empty($dto->phone) && $this->userRepository->findByPhone($dto->phone)) {
             return new JsonResponse(
                 ['error' => 'User with this phone number already exists.'],
-                Response::HTTP_CONFLICT
+                Response::HTTP_CONFLICT,
             );
         }
 
@@ -94,7 +95,7 @@ readonly class UserService
 
         return new JsonResponse(
             ['error' => 'Validation failed', 'errors' => $errors],
-            Response::HTTP_UNPROCESSABLE_ENTITY
+            Response::HTTP_UNPROCESSABLE_ENTITY,
         );
     }
 }

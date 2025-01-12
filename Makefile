@@ -18,3 +18,5 @@ migration:
 	make symfony cmd="make:migration"
 analyse:
 	vendor/bin/phpstan --memory-limit=512M analyse
+fix:
+	 vendor/bin/php-cs-fixer fix src/

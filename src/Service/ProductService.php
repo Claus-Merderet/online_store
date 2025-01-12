@@ -22,7 +22,7 @@ readonly class ProductService
     public function __construct(
         private EntityManagerInterface $entityManager,
         private ValidatorInterface $validator,
-        private ProductRepository $productRepository
+        private ProductRepository $productRepository,
     ) {
     }
 
@@ -49,7 +49,7 @@ readonly class ProductService
 
         return new JsonResponse(
             ['error' => 'Validation failed', 'errors' => $errors],
-            Response::HTTP_UNPROCESSABLE_ENTITY
+            Response::HTTP_UNPROCESSABLE_ENTITY,
         );
     }
 
@@ -116,7 +116,7 @@ readonly class ProductService
                 $product->getWeight(),
                 $product->getHeight(),
                 $product->getWidth(),
-                $product->getLength()
+                $product->getLength(),
             );
 
             return new ProductDTO(
@@ -126,7 +126,7 @@ readonly class ProductService
                 $product->getDescription(),
                 $product->getPrice(),
                 $product->getTax(),
-                $product->getVersion()
+                $product->getVersion(),
             );
         }, $products);
     }
