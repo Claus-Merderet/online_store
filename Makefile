@@ -20,3 +20,5 @@ analyse:
 	vendor/bin/phpstan --memory-limit=512M analyse
 fix:
 	 vendor/bin/php-cs-fixer fix src/
+test:
+	docker exec -it $(PHP_CONTAINER) ./vendor/bin/phpunit $(args)
