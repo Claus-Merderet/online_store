@@ -7,6 +7,7 @@ namespace App\Service;
 use App\DTO\MeasurementsDTO;
 use App\DTO\ProductDTO;
 use App\Entity\Product;
+use App\Factory\ProductFactory;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -23,6 +24,7 @@ readonly class ProductService
         private EntityManagerInterface $entityManager,
         private ValidatorInterface $validator,
         private ProductRepository $productRepository,
+        private ProductFactory $productFactory,
     ) {
     }
 
@@ -55,9 +57,8 @@ readonly class ProductService
 
     public function createProduct(ProductDTO $productDTO): Product
     {
-        $product = new Product($productDTO);
-        $this->entityManager->persist($product);
-        $this->entityManager->flush();
+        $product = $this->productFactory->create($productDTO);
+        $this->productRepository->save($product);
 
         return $product;
     }

@@ -12,49 +12,29 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: '`products`')]
 class Product
 {
-    #[ORM\Id]
-    #[ORM\Column]
-    private int $id;
-
-    #[ORM\Column(length: 255)]
-    private string $name;
-
-    #[ORM\Column]
-    private int $weight;
-
-    #[ORM\Column]
-    private int $height;
-
-    #[ORM\Column]
-    private int $width;
-
-    #[ORM\Column]
-    private int $length;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $description;
-
-    #[ORM\Column]
-    private int $price;
-
-    #[ORM\Column]
-    private int $tax;
-
-    #[ORM\Column]
-    private int $version;
-
-    public function __construct(ProductDTO $dto)
-    {
-        $this->id = $dto->id;
-        $this->name = $dto->name;
-        $this->weight = $dto->measurements->weight;
-        $this->height = $dto->measurements->height;
-        $this->width = $dto->measurements->width;
-        $this->length = $dto->measurements->length;
-        $this->description = $dto->description;
-        $this->price = $dto->cost;
-        $this->tax = $dto->tax;
-        $this->version = $dto->version;
+    public function __construct(
+        #[ORM\Id]
+        #[ORM\Column]
+        private int $id,
+        #[ORM\Column(length: 255)]
+        private string $name,
+        #[ORM\Column]
+        private int $weight,
+        #[ORM\Column]
+        private int $height,
+        #[ORM\Column]
+        private int $width,
+        #[ORM\Column]
+        private int $length,
+        #[ORM\Column(length: 255, nullable: true)]
+        private ?string $description,
+        #[ORM\Column]
+        private int $price,
+        #[ORM\Column]
+        private int $tax,
+        #[ORM\Column]
+        private int $version,
+    ) {
     }
 
     public function syncWithDTO(ProductDTO $dto): void
