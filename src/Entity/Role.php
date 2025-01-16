@@ -16,8 +16,13 @@ class Role
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 100, nullable: false)]
+    #[ORM\Column(length: 100, unique: true)]
     private string $roleName;
+
+    public function __construct(string $roleName)
+    {
+        $this->roleName = $roleName;
+    }
 
     public function getId(): int
     {
@@ -27,12 +32,5 @@ class Role
     public function getRoleName(): ?string
     {
         return $this->roleName;
-    }
-
-    public function setRoleName(string $roleName): static
-    {
-        $this->roleName = $roleName;
-
-        return $this;
     }
 }

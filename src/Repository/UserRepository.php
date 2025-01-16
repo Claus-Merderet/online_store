@@ -25,12 +25,12 @@ class UserRepository extends ServiceEntityRepository
         $this->entityManager->flush();
     }
 
-    public function findByEmail(string $email): User|null
+    public function findOneByEmail(string $email): User|null
     {
         return $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
     }
 
-    public function findByPhone(string $phone): User|null
+    public function findOneByPhone(string $phone): User|null
     {
         return $this->entityManager->getRepository(User::class)->findOneBy(['phone' => $phone]);
     }
@@ -38,5 +38,17 @@ class UserRepository extends ServiceEntityRepository
     public function findById(string $id): User|null
     {
         return $this->entityManager->getRepository(User::class)->find($id);
+    }
+
+    public function deleteById(string $id): User|null
+    {
+        $user = $this->findById($id);
+
+        if ($user) {
+            $this->entityManager->remove($user);
+            $this->entityManager->flush();
+        }
+
+        return $user;
     }
 }

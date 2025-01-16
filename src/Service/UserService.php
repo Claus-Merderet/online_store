@@ -69,11 +69,11 @@ readonly class UserService
         if (count($errors) > 0) {
             return $this->createValidationErrorResponse($errors);
         }
-        if (!empty($dto->email) && $this->userRepository->findByEmail($dto->email)) {
+        if (!empty($dto->email) && $this->userRepository->findOneByEmail($dto->email)) {
             return new JsonResponse(['error' => 'User with this email already exists.'], Response::HTTP_CONFLICT);
         }
 
-        if (!empty($dto->phone) && $this->userRepository->findByPhone($dto->phone)) {
+        if (!empty($dto->phone) && $this->userRepository->findOneByPhone($dto->phone)) {
             return new JsonResponse(
                 ['error' => 'User with this phone number already exists.'],
                 Response::HTTP_CONFLICT,

@@ -116,7 +116,7 @@ class User implements AuthUserInterface
 
     public function getRoles(): array
     {
-        return [$this->role->getRoleName(), 'ROLE_USER'];
+        return [$this->role->getRoleName()];
     }
 
     public function eraseCredentials(): void

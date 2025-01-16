@@ -19,8 +19,18 @@ class RoleRepository extends ServiceEntityRepository
         parent::__construct($registry, Role::class);
     }
 
-    public function getRoleUser(): Role
+    public function getRoleUser(): ?Role
     {
-        return $this->entityManager->getRepository(Role::class)->find(2);
+        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => 'USER_ROLE']);
+    }
+
+    public function getRoleAdmin(): ?Role
+    {
+        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => 'ADMIN_ROLE']);
+    }
+
+    public function getRoleSuperAdmin(): ?Role
+    {
+        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => 'SUPER_ADMIN_ROLE']);
     }
 }

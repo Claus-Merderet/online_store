@@ -22,3 +22,7 @@ fix:
 	 vendor/bin/php-cs-fixer fix src/
 test:
 	docker exec -it $(PHP_CONTAINER) ./vendor/bin/phpunit $(args)
+fixtures:
+	make symfony cmd="doctrine:fixtures:load"
+fixtures_test:
+	make symfony cmd="doctrine:fixtures:load --env=test"

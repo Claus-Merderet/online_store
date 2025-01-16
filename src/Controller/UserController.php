@@ -80,6 +80,7 @@ class UserController extends AbstractController
 
         return new JsonResponse([
             'message' => 'User registered and authenticated successfully.',
+            'user_id' => $user->getId(),
             'tokens' => [
                 'access_token' => $tokens['access_token'],
                 'refresh_token' => $tokens['refresh_token'],

@@ -27,9 +27,9 @@ readonly class UserProvider implements UserProviderInterface
     {
         // Проверяем, является ли идентификатор email иначе ищем по телефону
         if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
-            $user = $this->userRepository->findByEmail($identifier);
+            $user = $this->userRepository->findOneByEmail($identifier);
         } else {
-            $user = $this->userRepository->findByPhone($identifier);
+            $user = $this->userRepository->findOneByPhone($identifier);
         }
 
         if (!$user) {
