@@ -19,21 +19,21 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
             'email' => 'justuser@example.com',
             'password' => 'test123!',
             'promoId' => '',
-            'role' => RoleFixtures::USER_ROLE,
+            'role' => RoleFixtures::ROLE_USER,
         ],
         [
             'phone' => '+79493223333',
             'email' => 'admin@example.com',
             'password' => 'admin123!',
             'promoId' => '',
-            'role' => RoleFixtures::ADMIN_ROLE,
+            'role' => RoleFixtures::ROLE_ADMIN,
         ],
         [
             'phone' => '+7848483384',
             'email' => 'super_admin@example.com',
             'password' => 'test123!',
             'promoId' => '',
-            'role' => RoleFixtures::SUPER_ADMIN_ROLE,
+            'role' => RoleFixtures::ROLE_SUPER_ADMIN,
         ],
     ];
 

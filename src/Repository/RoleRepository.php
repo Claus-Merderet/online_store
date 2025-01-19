@@ -21,16 +21,16 @@ class RoleRepository extends ServiceEntityRepository
 
     public function getRoleUser(): ?Role
     {
-        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => 'USER_ROLE']);
+        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => 'ROLE_USER']);
     }
 
     public function getRoleAdmin(): ?Role
     {
-        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => 'ADMIN_ROLE']);
+        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => 'ROLE_ADMIN']);
     }
 
     public function getRoleSuperAdmin(): ?Role
     {
-        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => 'SUPER_ADMIN_ROLE']);
+        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => 'ROLE_SUPER_ADMIN']);
     }
 }

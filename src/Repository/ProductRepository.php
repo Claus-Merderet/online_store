@@ -24,4 +24,35 @@ class ProductRepository extends ServiceEntityRepository
         $this->entityManager->persist($product);
         $this->entityManager->flush();
     }
+
+    public function findById(string $id): Product|null
+    {
+        return $this->entityManager->getRepository(Product::class)->find($id);
+    }
+
+    /**
+     * @return null|array{id: int, name: string, description: null|string, price: int, tax: int, version: int, weight: int, height: int, width: int, length: int}
+     */
+    public function findByIdAsArray(string $id): array|null
+    {
+        $product = $this->entityManager->getRepository(Product::class)->find($id);
+
+        if ($product === null) {
+            return null;
+        }
+
+        return $this->entityManager->getUnitOfWork()->getOriginalEntityData($product);
+    }
+
+    public function deleteById(string $id): Product|null
+    {
+        $product = $this->findById($id);
+
+        if ($product) {
+            $this->entityManager->remove($product);
+            $this->entityManager->flush();
+        }
+
+        return $product;
+    }
 }

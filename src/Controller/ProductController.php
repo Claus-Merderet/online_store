@@ -25,7 +25,7 @@ class ProductController extends AbstractController
 
     #[Route('/api/products', name: 'get_products', methods: ['GET'])]
     #[OA\Get(summary: 'Return a product list')]
-    public function index(#[MapQueryParameter] int $page): JsonResponse
+    public function index(#[MapQueryParameter] int $page = 1): JsonResponse
     {
         $paginationData = $this->productService->getPaginatedProducts($page);
         $productsDTO = $this->productService->mapProductsToDTO($paginationData['products']);

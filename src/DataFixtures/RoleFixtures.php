@@ -10,16 +10,16 @@ use Doctrine\Persistence\ObjectManager;
 
 class RoleFixtures extends Fixture
 {
-    public const USER_ROLE = 'USER_ROLE';
+    public const ROLE_USER = 'ROLE_USER';
 
-    public const ADMIN_ROLE = 'ADMIN_ROLE';
+    public const ROLE_ADMIN = 'ROLE_ADMIN';
 
-    public const SUPER_ADMIN_ROLE = 'SUPER_ADMIN_ROLE';
+    public const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
 
     private const ROLES = [
-        self::USER_ROLE,
-        self::ADMIN_ROLE,
-        self::SUPER_ADMIN_ROLE,
+        self::ROLE_USER,
+        self::ROLE_ADMIN,
+        self::ROLE_SUPER_ADMIN,
     ];
 
     public function load(ObjectManager $manager): void
