@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Controller;
 
+use App\DataFixtures\UserFixtures;
 use App\Entity\Product;
 use App\Repository\ProductRepository;
 use App\Tests\Traits\AuthTrait;
@@ -32,22 +33,9 @@ class ProductControllerTest extends WebTestCase
 
     public function testCreateProductSuccess(): void
     {
-        $response = $this->authenticateUser($this->client, 'admin@example.com', 'admin123!');
+        $response = $this->authenticateUser($this->client, UserFixtures::ADMIN_EMAIL, UserFixtures::ADMIN_PASSWORD);
         $responseData = json_decode($response->getContent(), true);
-        $jsonData = json_encode([
-            'id' => 100,
-            'name' => 'Test Product',
-            'measurements' => [
-                'weight' => 1,
-                'height' => 1,
-                'width' => 1,
-                'length' => 1,
-            ],
-            'description' => 'Test Description',
-            'cost' => 100,
-            'tax' => 10,
-            'version' => 1,
-        ]);
+        $jsonData = json_encode($this->createTestProductData());
         $this->client->request(
             method: 'POST',
             uri: '/api/products',
@@ -69,7 +57,7 @@ class ProductControllerTest extends WebTestCase
 
     public function testUpdateProductSuccess(): void
     {
-        $response = $this->authenticateUser($this->client, 'admin@example.com', 'admin123!');
+        $response = $this->authenticateUser($this->client, UserFixtures::ADMIN_EMAIL, UserFixtures::ADMIN_PASSWORD);
         $responseData = json_decode($response->getContent(), true);
         $productArray = $this->productRepository->findByIdAsArray('1');
         $jsonData = json_encode([
@@ -103,5 +91,26 @@ class ProductControllerTest extends WebTestCase
             $product->getVersion(),
             'The version field is not updated'
         );
+    }
+
+    /**
+     * @return array{id: int, name: string, measurements: array{weight: int, height: int, width: int, length: int}, description: string, cost: int, tax: int, version: int}
+     */
+    private function createTestProductData(): array
+    {
+        return [
+            'id' => 100,
+            'name' => 'Test Product',
+            'measurements' => [
+                'weight' => 1,
+                'height' => 1,
+                'width' => 1,
+                'length' => 1,
+            ],
+            'description' => 'Test Description',
+            'cost' => 100,
+            'tax' => 10,
+            'version' => 1,
+        ];
     }
 }

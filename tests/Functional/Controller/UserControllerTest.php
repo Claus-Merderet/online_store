@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Functional\Controller;
 
 use App\DataFixtures\RoleFixtures;
+use App\DataFixtures\UserFixtures;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Tests\Traits\AuthTrait;
@@ -50,7 +51,7 @@ class UserControllerTest extends WebTestCase
 
     public function testAuthSuccess(): void
     {
-        $response = $this->authenticateUser($this->client, 'justuser@example.com', 'test123!');
+        $response = $this->authenticateUser($this->client, UserFixtures::USER_EMAIL, UserFixtures::USER_PASSWORD);
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
         $authResponseData = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('token', $authResponseData);
@@ -59,7 +60,7 @@ class UserControllerTest extends WebTestCase
 
     public function testGetAuthenticatedUser(): void
     {
-        $response = $this->authenticateUser($this->client, '+79493223333', 'admin123!');
+        $response = $this->authenticateUser($this->client, UserFixtures::ADMIN_PHONE, UserFixtures::ADMIN_PASSWORD);
         $authResponseData = json_decode($response->getContent(), true);
         $this->client->request(
             method: 'GET',

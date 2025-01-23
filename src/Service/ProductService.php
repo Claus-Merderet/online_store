@@ -71,16 +71,6 @@ readonly class ProductService
         return $product;
     }
 
-    public function productExists(int $id): bool
-    {
-        return (bool)$this->entityManager->getRepository(Product::class)->find($id);
-    }
-
-    public function findProduct(int $id): ?Product
-    {
-        return $this->entityManager->getRepository(Product::class)->find($id);
-    }
-
     /**
      * @return array{
      *     products: Product[],

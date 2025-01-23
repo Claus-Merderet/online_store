@@ -13,29 +13,23 @@ use Doctrine\Persistence\ObjectManager;
 
 class UserFixtures extends Fixture implements DependentFixtureInterface
 {
-    private const USERS_DATA = [
-        [
-            'phone' => '+7999999999',
-            'email' => 'justuser@example.com',
-            'password' => 'test123!',
-            'promoId' => '',
-            'role' => RoleFixtures::ROLE_USER,
-        ],
-        [
-            'phone' => '+79493223333',
-            'email' => 'admin@example.com',
-            'password' => 'admin123!',
-            'promoId' => '',
-            'role' => RoleFixtures::ROLE_ADMIN,
-        ],
-        [
-            'phone' => '+7848483384',
-            'email' => 'super_admin@example.com',
-            'password' => 'test123!',
-            'promoId' => '',
-            'role' => RoleFixtures::ROLE_SUPER_ADMIN,
-        ],
-    ];
+    public const USER_PHONE = '+7999999999';
+
+    public const USER_EMAIL = 'justuser@example.com';
+
+    public const USER_PASSWORD = 'test123!';
+
+    public const ADMIN_PHONE = '+79493223333';
+
+    public const ADMIN_EMAIL = 'admin@example.com';
+
+    public const ADMIN_PASSWORD = 'admin123!';
+
+    public const SUPER_ADMIN_PHONE = '+7848483384';
+
+    public const SUPER_ADMIN_EMAIL = 'super_admin@example.com';
+
+    public const SUPER_ADMIN_PASSWORD = 'test123!';
 
     public function __construct(
         private readonly UserFactory $userFactory,
@@ -44,13 +38,8 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
-        foreach (self::USERS_DATA as $userData) {
-            $dto = new RegisterUserDTO(
-                $userData['phone'],
-                $userData['email'],
-                $userData['password'],
-                $userData['promoId'],
-            );
+        foreach (self::getUsersData() as $userData) {
+            $dto = $this->createRegisterUserDTO($userData);
             $role = $this->getReference($userData['role'], Role::class);
             $user = $this->userFactory->create($dto, $role);
             $manager->persist($user);
@@ -64,5 +53,48 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
         return [
             RoleFixtures::class,
         ];
+    }
+
+    /**
+     * @return array<array{phone: string, email: string, password: string, promoId: string, role: string}>
+     */
+    private static function getUsersData(): array
+    {
+        return [
+            [
+                'phone' => self::USER_PHONE,
+                'email' => self::USER_EMAIL,
+                'password' => self::USER_PASSWORD,
+                'promoId' => '',
+                'role' => RoleFixtures::ROLE_USER,
+            ],
+            [
+                'phone' => self::ADMIN_PHONE,
+                'email' => self::ADMIN_EMAIL,
+                'password' => self::ADMIN_PASSWORD,
+                'promoId' => '',
+                'role' => RoleFixtures::ROLE_ADMIN,
+            ],
+            [
+                'phone' => self::SUPER_ADMIN_PHONE,
+                'email' => self::SUPER_ADMIN_EMAIL,
+                'password' => self::SUPER_ADMIN_PASSWORD,
+                'promoId' => '',
+                'role' => RoleFixtures::ROLE_SUPER_ADMIN,
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $userData
+     */
+    private function createRegisterUserDTO(array $userData): RegisterUserDTO
+    {
+        return new RegisterUserDTO(
+            $userData['phone'],
+            $userData['email'],
+            $userData['password'],
+            $userData['promoId'],
+        );
     }
 }

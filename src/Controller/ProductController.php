@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\DTO\ProductDTO;
+use App\Repository\ProductRepository;
 use App\Service\ProductService;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
@@ -19,7 +20,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[OA\Tag(name: 'Product')]
 class ProductController extends AbstractController
 {
-    public function __construct(private readonly ProductService $productService)
+    public function __construct(private readonly ProductService $productService, private ProductRepository $productRepository)
     {
     }
 
@@ -58,7 +59,8 @@ class ProductController extends AbstractController
         if ($validationErrors !== null) {
             return $validationErrors;
         }
-        if ($this->productService->productExists($productDTO->id)) {
+
+        if ($this->productRepository->findById((string)$productDTO->id) !== null) {
             return new JsonResponse(
                 ['error' => 'Product with this ID already exists: ' . $productDTO->id],
                 Response::HTTP_BAD_REQUEST,
@@ -85,9 +87,9 @@ class ProductController extends AbstractController
         if ($validationErrors !== null) {
             return $validationErrors;
         }
-        $product = $this->productService->findProduct($productDTO->id);
+        $product = $this->productRepository->findById((string)$productDTO->id);
 
-        if (!$product) {
+        if ($product === null) {
             return new JsonResponse(
                 ['error' => 'Product not found', 'id' => $productDTO->id],
                 Response::HTTP_BAD_REQUEST,
@@ -97,6 +99,27 @@ class ProductController extends AbstractController
 
         return new JsonResponse(
             ['message' => 'Product updated successfully'],
+            Response::HTTP_ACCEPTED,
+        );
+    }
+
+    #[Route('/api/products', name: 'product_delete', methods: ['DELETE'])]
+    #[OA\Put(summary: 'Delete a product')]
+    #[IsGranted('ROLE_ADMIN', message: 'Only admins can delete products.')]
+    #[Security(name: 'Bearer')]
+    public function delete(#[MapQueryParameter] int $productId = 1): JsonResponse
+    {
+        $product = $this->productRepository->deleteById((string)$productId);
+
+        if ($product === null) {
+            return new JsonResponse(
+                ['error' => 'Product not found', 'id' => $productId],
+                Response::HTTP_BAD_REQUEST,
+            );
+        }
+
+        return new JsonResponse(
+            ['message' => 'Product removed successfully. ID: ' . $productId],
             Response::HTTP_ACCEPTED,
         );
     }
