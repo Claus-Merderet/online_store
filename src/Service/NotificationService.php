@@ -28,7 +28,7 @@ class NotificationService
      */
     private function sendSms(array $data): void
     {
-        // Логика отправки SMS
+        // TODO: Логика отправки SMS
     }
 
     /**
@@ -36,6 +36,6 @@ class NotificationService
      */
     private function sendEmail(array $data): void
     {
-        // Логика отправки email
+        // TODO: Логика отправки email
     }
 }
