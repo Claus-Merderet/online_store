@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Entity\OrderStatusHistory;
+use App\Entity\CartItem;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<OrderStatusHistory>
+ * @extends ServiceEntityRepository<CartItem>
  */
-class OrderStatusHistoryRepository extends ServiceEntityRepository
+class CartItemRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, OrderStatusHistory::class);
+        parent::__construct($registry, CartItem::class);
     }
 }

@@ -64,6 +64,9 @@ class User implements AuthUserInterface
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'userId', orphanRemoval: true)]
     private Collection $orders;
 
+    #[ORM\OneToOne(targetEntity: Cart::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?Cart $cart = null;
+
     public function __construct(RegisterUserDTO $registerUserDTO, Role $role)
     {
         $this->email = $registerUserDTO->email ?? '';

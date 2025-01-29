@@ -50,7 +50,7 @@ class ProductControllerTest extends WebTestCase
         $this->assertEquals(Response::HTTP_CREATED, $this->client->getResponse()->getStatusCode());
         $this->assertInstanceOf(
             Product::class,
-            $this->productRepository->deleteById((string)$responseData['id']),
+            $this->productRepository->deleteById($responseData['id']),
             'Created product not found'
         );
     }
@@ -59,7 +59,7 @@ class ProductControllerTest extends WebTestCase
     {
         $response = $this->authenticateUser($this->client, UserFixtures::ADMIN_EMAIL, UserFixtures::ADMIN_PASSWORD);
         $responseData = json_decode($response->getContent(), true);
-        $productArray = $this->productRepository->findByIdAsArray('1');
+        $productArray = $this->productRepository->findByIdAsArray(1);
         $jsonData = json_encode([
             'id' => $productArray['id'],
             'name' => $productArray['name'],
@@ -85,7 +85,7 @@ class ProductControllerTest extends WebTestCase
         );
 
         $this->assertEquals(Response::HTTP_ACCEPTED, $this->client->getResponse()->getStatusCode());
-        $product = $this->productRepository->findById('1');
+        $product = $this->productRepository->find(1);
         $this->assertEquals(
             $productArray['version'] + 1,
             $product->getVersion(),

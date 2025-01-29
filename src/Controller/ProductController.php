@@ -60,7 +60,7 @@ class ProductController extends AbstractController
             return $validationErrors;
         }
 
-        if ($this->productRepository->findById((string)$productDTO->id) !== null) {
+        if ($this->productRepository->find($productDTO->id) !== null) {
             return new JsonResponse(
                 ['error' => 'Product with this ID already exists: ' . $productDTO->id],
                 Response::HTTP_BAD_REQUEST,
@@ -74,7 +74,7 @@ class ProductController extends AbstractController
         );
     }
 
-    #[Route('/api/products', name: 'product_update', methods: ['PUT'])]
+    #[Route('/api/products', name: 'product_update', methods: ['PUT'])] // TODO: заменить название ролей на константы
     #[OA\Put(summary: 'Update a product')]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can create products.')]
     #[Security(name: 'Bearer')]
@@ -87,7 +87,7 @@ class ProductController extends AbstractController
         if ($validationErrors !== null) {
             return $validationErrors;
         }
-        $product = $this->productRepository->findById((string)$productDTO->id);
+        $product = $this->productRepository->find($productDTO->id);
 
         if ($product === null) {
             return new JsonResponse(
@@ -109,7 +109,7 @@ class ProductController extends AbstractController
     #[Security(name: 'Bearer')]
     public function delete(#[MapQueryParameter] int $productId = 1): JsonResponse
     {
-        $product = $this->productRepository->deleteById((string)$productId);
+        $product = $this->productRepository->deleteById($productId);
 
         if ($product === null) {
             return new JsonResponse(

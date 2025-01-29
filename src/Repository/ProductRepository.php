@@ -25,15 +25,10 @@ class ProductRepository extends ServiceEntityRepository
         $this->entityManager->flush();
     }
 
-    public function findById(string $id): Product|null
-    {
-        return $this->entityManager->getRepository(Product::class)->find($id);
-    }
-
     /**
      * @return null|array{id: int, name: string, description: null|string, price: int, tax: int, version: int, weight: int, height: int, width: int, length: int}
      */
-    public function findByIdAsArray(string $id): array|null
+    public function findByIdAsArray(int $id): array|null
     {
         $product = $this->entityManager->getRepository(Product::class)->find($id);
 
@@ -44,9 +39,9 @@ class ProductRepository extends ServiceEntityRepository
         return $this->entityManager->getUnitOfWork()->getOriginalEntityData($product);
     }
 
-    public function deleteById(string $id): Product|null
+    public function deleteById(int $id): Product|null
     {
-        $product = $this->findById($id);
+        $product = $this->find($id);
 
         if ($product) {
             $this->entityManager->remove($product);
