@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\DTO\CartItemDTO;
+use App\DTO\CartDto;
+use App\Entity\Cart;
 use App\Factory\CartFactory;
 use App\Repository\CartRepository;
 use App\Repository\ProductRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,10 +27,11 @@ class CartController extends AbstractController
         private readonly CartRepository $cartRepository,
         private readonly CartFactory $cartFactory,
         private readonly ProductRepository $productRepository,
+        private readonly  EntityManagerInterface $entityManager,
     ) {
     }
 
-    #[Route('/api/cart', name: 'cart_create', methods: ['POST'])]
+    #[Route('/api/carts', name: 'cart_create', methods: ['POST'])]
     #[OA\Put(summary: 'Create cart')]
     #[IsGranted('IS_AUTHENTICATED_FULLY', message: 'Only auth user can create cart.')]
     #[Security(name: 'Bearer')]
@@ -35,20 +39,43 @@ class CartController extends AbstractController
         #[MapRequestPayload(
             acceptFormat: 'json',
             validationFailedStatusCode: Response::HTTP_BAD_REQUEST,
-        )] CartItemDTO $cartItemDTO,
+        )] CartDTO $cartDTO,
     ): JsonResponse {
-        $product = $this->productRepository->find($cartItemDTO->productId);
-        $user = $this->getUser();
-        if ($product === null) {
-            return new JsonResponse(['error' => 'Product not found'], Response::HTTP_BAD_REQUEST);
+        foreach ($cartDTO->cartItems as $item) {
+            $product = $this->productRepository->find($item->productId);
+            if ($product === null) {
+                return new JsonResponse(['error' => 'Product not found. ID:' . $item->productId], Response::HTTP_BAD_REQUEST);
+            }
+            $item->product = $product;
         }
+        $user = $this->getUser();
         if ($this->cartRepository->findByUser($user) !== null) {
             return new JsonResponse(['error' => 'Cart already exists'], Response::HTTP_BAD_REQUEST);
         }
-        $cart = $this->cartFactory->create($cartItemDTO, $product, $user);
+        $cart = $this->cartFactory->create($cartDTO, $user);
 
         $this->cartRepository->save($cart);
 
-        return new JsonResponse(['cartId' => $cart->getId()], status: Response::HTTP_OK);
+        return new JsonResponse(['cartId' => $cart->getId()], Response::HTTP_OK);
+    }
+
+    #[Route('/api/carts/{id}', name: 'cart_delete', methods: ['DELETE'])]
+    #[OA\Put(summary: 'Delete cart')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY', message: 'Only auth user can delete cart.')]
+    #[Security(name: 'Bearer')]
+    public function delete(#[MapEntity(id: 'id')] Cart $cart): JsonResponse
+    {
+        if ($cart->getUser() !== $this->getUser()) {
+            if ($this->isGranted('ROLE_ADMIN') === false) {
+                return new JsonResponse(
+                    ['error' => 'You do not have sufficient permissions to perform this action.'],
+                    Response::HTTP_FORBIDDEN,
+                );
+            }
+        }
+        $this->entityManager->remove($cart);
+        $this->entityManager->flush();
+
+        return new JsonResponse(['message' => 'Successfully deleted'], Response::HTTP_OK);
     }
 }

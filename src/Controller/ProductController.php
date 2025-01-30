@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\DTO\ProductDTO;
+use App\Entity\Product;
 use App\Repository\ProductRepository;
 use App\Service\ProductService;
+use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,8 +23,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[OA\Tag(name: 'Product')]
 class ProductController extends AbstractController
 {
-    public function __construct(private readonly ProductService $productService, private ProductRepository $productRepository)
-    {
+    public function __construct(
+        private readonly ProductService $productService,
+        private readonly ProductRepository $productRepository,
+        private readonly EntityManagerInterface $entityManager,
+    ) {
     }
 
     #[Route('/api/products', name: 'get_products', methods: ['GET'])]
@@ -103,23 +109,17 @@ class ProductController extends AbstractController
         );
     }
 
-    #[Route('/api/products', name: 'product_delete', methods: ['DELETE'])]
+    #[Route('/api/products/{id}', name: 'product_delete', methods: ['DELETE'])]
     #[OA\Put(summary: 'Delete a product')]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can delete products.')]
     #[Security(name: 'Bearer')]
-    public function delete(#[MapQueryParameter] int $productId = 1): JsonResponse
+    public function delete(#[MapEntity(id: 'id')] Product $product): JsonResponse
     {
-        $product = $this->productRepository->deleteById($productId);
-
-        if ($product === null) {
-            return new JsonResponse(
-                ['error' => 'Product not found', 'id' => $productId],
-                Response::HTTP_BAD_REQUEST,
-            );
-        }
+        $this->entityManager->remove($product);
+        $this->entityManager->flush();
 
         return new JsonResponse(
-            ['message' => 'Product removed successfully. ID: ' . $productId],
+            ['message' => 'Product removed successfully. ID: ' . $product->getId()],
             Response::HTTP_ACCEPTED,
         );
     }

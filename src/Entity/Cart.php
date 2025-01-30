@@ -48,6 +48,11 @@ class Cart
         return $this->id;
     }
 
+    public function getUser(): User
+    {
+        return $this->user;
+    }
+
     public function getUpdatedAt(): DateTimeInterface
     {
         return $this->updatedAt;

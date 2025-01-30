@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
+use App\Entity\Product;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class CartItemDTO
@@ -17,6 +18,7 @@ class CartItemDTO
         #[Assert\Type(type: 'integer', message: 'The quantity field must be an integer.')]
         #[Assert\Positive(message: 'The quantity field must be a positive number.')]
         public int $quantity,
+        public ?Product $product,
     ) {
     }
 }
