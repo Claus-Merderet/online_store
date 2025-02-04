@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\DTO\CartDto;
 use App\Repository\CartRepository;
 use DateTime;
 use DateTimeInterface;
@@ -11,6 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CartRepository::class)]
 class Cart
@@ -18,6 +20,7 @@ class Cart
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['cart'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(targetEntity: User::class, inversedBy: 'cart')]
@@ -28,12 +31,15 @@ class Cart
      * @var Collection<int,CartItem>
      */
     #[ORM\OneToMany(targetEntity: CartItem::class, mappedBy: 'cart', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[Groups(['cart'])]
     private Collection $cartItems;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    #[Groups(['cart'])]
     private DateTimeInterface $createdAt;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    #[Groups(['cart'])]
     private ?DateTimeInterface $updatedAt = null;
 
     public function __construct(User $user)
@@ -84,5 +90,14 @@ class Cart
     public function getCartItems(): Collection
     {
         return $this->cartItems;
+    }
+
+    public function syncWithDTO(CartDTO $cartDto): void
+    {
+        $this->cartItems = new ArrayCollection();
+        foreach ($cartDto->cartItems as $item) {
+            $this->addCartItem(new CartItem($item->product, $item->quantity));
+        }
+        $this->updatedAt = new DateTime();
     }
 }

@@ -62,7 +62,7 @@ readonly class UserService
         ];
     }
 
-    public function validateDTO(RegisterUserDTO $dto): ?JsonResponse
+    public function validateDTO(RegisterUserDTO $dto): JsonResponse|null
     {
         $errors = $this->validator->validate($dto);
 

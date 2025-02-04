@@ -24,10 +24,4 @@ class CartRepository extends ServiceEntityRepository
     {
         return $this->entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
     }
-
-    public function save(Cart $cart): void
-    {
-        $this->entityManager->persist($cart);
-        $this->entityManager->flush();
-    }
 }

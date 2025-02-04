@@ -7,9 +7,11 @@ namespace App\Entity;
 use App\DTO\ProductDTO;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[ORM\Table(name: '`products`')]
+#[Groups(['cart'])]
 class Product
 {
     public function __construct(
