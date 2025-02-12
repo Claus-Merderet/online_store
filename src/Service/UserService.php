@@ -64,7 +64,7 @@ readonly class UserService
 
     public function validateDTO(RegisterUserDTO $dto): JsonResponse|null
     {
-        $errors = $this->validator->validate($dto);
+        $errors = $this->validator->validate($dto);// TODO: похоже не надо
 
         if (count($errors) > 0) {
             return $this->createValidationErrorResponse($errors);

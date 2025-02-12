@@ -12,7 +12,7 @@ class CartDto
      *  @param CartItemDTO[] $cartItems
      */
     public function __construct(
-        #[Assert\NotBlank(message: 'The CartItemsDTO field is required.')]
+        #[Assert\NotBlank(message: 'The CartItems field is required.')]
         #[Assert\Valid]
         public array $cartItems,
     ) {

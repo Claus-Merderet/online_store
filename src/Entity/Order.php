@@ -10,6 +10,7 @@ use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`orders`')]
@@ -18,44 +19,65 @@ class Order
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['order:index'])]
     private ?int $id = null;
 
     #[ORM\Column(enumType: NotificationType::class)]
+    #[Groups(['order:index'])]
     private NotificationType $notificationType;
 
-    #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'orders')]
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['order:index'])]
     private ?string $address = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['order:index'])]
     private ?int $kladrId = null;
 
     #[ORM\Column(length: 15, nullable: true)]
+    #[Groups(['order:index'])]
     private ?string $userPhone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['order:index'])]
     private ?string $userEmail = null;
 
     #[ORM\Column(enumType: DeliveryType::class)]
+    #[Groups(['order:index'])]
     private DeliveryType $deliveryType;
 
     /**
      * @var Collection<int, OrderStatusHistory>
      */
-    #[ORM\OneToMany(targetEntity: OrderStatusHistory::class, mappedBy: 'orderId', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: OrderStatusHistory::class, mappedBy: 'order', cascade: ['persist'], orphanRemoval: true)]
+    #[Groups(['order:index'])]
     private Collection $orderStatusHistories;
 
     /**
      * @var Collection<int, OrderProducts>
      */
-    #[ORM\OneToMany(targetEntity: OrderProducts::class, mappedBy: 'orderId', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: OrderProducts::class, mappedBy: 'order', cascade: ['persist'], orphanRemoval: true)]
+    #[Groups(['order:index'])]
     private Collection $orderProducts;
 
-    public function __construct()
-    {
+    public function __construct(
+        NotificationType $notificationType,
+        User $user,
+        ?string $address,
+        ?int $kladrId,
+        ?string $userPhone,
+        DeliveryType $deliveryType,
+    ) {
+        $this->notificationType = $notificationType;
+        $this->user = $user;
+        $this->address = $address;
+        $this->kladrId = $kladrId;
+        $this->userPhone = $userPhone;
+        $this->deliveryType = $deliveryType;
         $this->orderStatusHistories = new ArrayCollection();
         $this->orderProducts = new ArrayCollection();
     }
@@ -163,5 +185,23 @@ class Order
     public function getOrderProducts(): Collection
     {
         return $this->orderProducts;
+    }
+
+    public function addProduct(OrderProducts $orderProducts): self
+    {
+        if (!$this->orderProducts->contains($orderProducts)) {
+            $this->orderProducts[] = $orderProducts;
+        }
+
+        return $this;
+    }
+
+    public function addStatusHistory(OrderStatusHistory $orderStatusHistory): self
+    {
+        if (!$this->orderStatusHistories->contains($orderStatusHistory)) {
+            $this->orderStatusHistories[] = $orderStatusHistory;
+        }
+
+        return $this;
     }
 }

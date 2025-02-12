@@ -6,8 +6,11 @@ namespace App\Entity;
 
 use App\Enum\StatusName;
 use App\Repository\OrderStatusHistoryRepository;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: OrderStatusHistoryRepository::class)]
 #[ORM\Table(name: '`order_status_history`')]
@@ -16,6 +19,7 @@ class OrderStatusHistory
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['order:index'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'orderStatusHistories')]
@@ -23,16 +27,34 @@ class OrderStatusHistory
     private Order $order;
 
     #[ORM\Column(enumType: StatusName::class)]
+    #[Groups(['order:index'])]
     private StatusName $statusName;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
-    private \DateTimeInterface $createdAt;
+    #[Groups(['order:index'])]
+    private DateTimeInterface $createdAt;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $comment = null;
+    #[Groups(['order:index'])]
+    private ?string $comment;
 
     #[ORM\ManyToOne(inversedBy: 'orderStatusHistories')]
-    private ?User $changedBy = null;
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['order:index'])]
+    private User $createdBy;
+
+    public function __construct(
+        Order $order,
+        StatusName $statusName,
+        ?string $comment,
+        User $createdBy,
+    ) {
+        $this->order = $order;
+        $this->statusName = $statusName;
+        $this->createdAt = new DateTime();
+        $this->comment = $comment;
+        $this->createdBy = $createdBy;
+    }
 
     public function getId(): int
     {
@@ -87,14 +109,14 @@ class OrderStatusHistory
         return $this;
     }
 
-    public function getChangedBy(): ?User
+    public function getCreatedBy(): User
     {
-        return $this->changedBy;
+        return $this->createdBy;
     }
 
-    public function setChangedBy(?User $changedBy): static
+    public function setCreatedBy(User $createdBy): static
     {
-        $this->changedBy = $changedBy;
+        $this->createdBy = $createdBy;
 
         return $this;
     }

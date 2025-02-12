@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Repository\RoleRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: RoleRepository::class)]
 #[ORM\Table(name: '`roles`')]
@@ -17,6 +18,7 @@ class Role
     private ?int $id = null;
 
     #[ORM\Column(length: 100, unique: true)]
+    #[Groups(['order:index'])]
     private string $roleName;
 
     public function __construct(string $roleName)

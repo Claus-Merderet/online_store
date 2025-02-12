@@ -12,6 +12,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -27,10 +28,12 @@ class User implements AuthUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['order:index'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['order:index'])]
     private Role $role;
 
     #[ORM\Column(length: 255, unique: true, nullable: true)]
@@ -44,6 +47,7 @@ class User implements AuthUserInterface
     private ?string $phone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['order:index'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 64)]
@@ -55,13 +59,13 @@ class User implements AuthUserInterface
     /**
      * @var Collection<int, UserAddresses>
      */
-    #[ORM\OneToMany(targetEntity: UserAddresses::class, mappedBy: 'userId', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: UserAddresses::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $userAddresses;
 
     /**
      * @var Collection<int, Order>
      */
-    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'userId', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $orders;
 
     #[ORM\OneToOne(targetEntity: Cart::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
@@ -146,5 +150,18 @@ class User implements AuthUserInterface
     public function setOrders(Collection $orders): void
     {
         $this->orders = $orders;
+    }
+
+    /**
+     * @return   Collection<int, Order>
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
     }
 }

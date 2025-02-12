@@ -8,12 +8,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class RegisterUserDTO
 {
-    #[Assert\NotBlank(message: 'The userPhone field is required for type "sms".', groups: ['sms'])]
-    #[Assert\Regex(pattern: '/^\+?[1-9]\d{1,14}$/', message: 'Invalid phone number.', groups: ['sms'])]
+    #[Assert\NotBlank(message: 'The userPhone field is required for type "sms".')]
+    #[Assert\Regex(pattern: '/^\+?[1-9]\d{1,14}$/', message: 'Invalid phone number.')]
     public ?string $phone = null;
 
-    #[Assert\NotBlank(message: 'The userEmail field is required for type "email".', groups: ['email'])]
-    #[Assert\Email(message: 'Invalid email address.', groups: ['email'])]
+    #[Assert\NotBlank(message: 'The userEmail field is required for type "email".')]
+    #[Assert\Email(message: 'Invalid email address.')]
     public ?string $email = null;
 
     #[Assert\NotBlank(message: 'The password field is required.')]
@@ -26,11 +26,14 @@ class RegisterUserDTO
     #[Assert\Uuid(message: 'Invalid promoId. It must be a valid UUID.')]
     public ?string $promoId = null;
 
-    public function __construct(?string $userPhone, ?string $userEmail, string $password, ?string $promoId)
+    public ?string $name = null;
+
+    public function __construct(?string $userPhone, ?string $userEmail, string $password, ?string $promoId, ?string $name)
     {
         $this->phone = $userPhone;
         $this->email = $userEmail;
         $this->password = $password;
         $this->promoId = $promoId;
+        $this->name = $name;
     }
 }

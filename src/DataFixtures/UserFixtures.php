@@ -67,6 +67,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
                 'password' => self::USER_PASSWORD,
                 'promoId' => '',
                 'role' => RoleFixtures::ROLE_USER,
+                'name' => 'Max',
             ],
             [
                 'phone' => self::ADMIN_PHONE,
@@ -74,6 +75,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
                 'password' => self::ADMIN_PASSWORD,
                 'promoId' => '',
                 'role' => RoleFixtures::ROLE_ADMIN,
+                'name' => 'Sam',
             ],
             [
                 'phone' => self::SUPER_ADMIN_PHONE,
@@ -81,6 +83,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
                 'password' => self::SUPER_ADMIN_PASSWORD,
                 'promoId' => '',
                 'role' => RoleFixtures::ROLE_SUPER_ADMIN,
+                'name' => 'Bob',
             ],
         ];
     }
@@ -95,6 +98,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
             $userData['email'],
             $userData['password'],
             $userData['promoId'],
+            $userData['name'],
         );
     }
 }

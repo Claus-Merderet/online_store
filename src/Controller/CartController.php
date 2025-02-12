@@ -46,7 +46,7 @@ class CartController extends AbstractController
     }
 
     #[Route('/api/carts', name: 'cart_create', methods: ['POST'])]
-    #[OA\Put(summary: 'Create cart')]
+    #[OA\Post(summary: 'Create cart')]
     #[IsGranted('IS_AUTHENTICATED_FULLY', message: 'Only auth user can create cart.')]
     #[Security(name: 'Bearer')]
     public function create(
@@ -70,7 +70,7 @@ class CartController extends AbstractController
     }
 
     #[Route('/api/carts/{id}', name: 'cart_delete', methods: ['DELETE'])]
-    #[OA\Put(summary: 'Delete cart')]
+    #[OA\Delete(summary: 'Delete cart')]
     #[IsGranted('IS_AUTHENTICATED_FULLY', message: 'Only auth user can delete cart.')]
     #[Security(name: 'Bearer')]
     public function delete(#[MapEntity(id: 'id')] Cart $cart): JsonResponse
@@ -104,7 +104,7 @@ class CartController extends AbstractController
             return $errors;
         }
 
-        $cart->syncWithDTO($cartDTO);
+        $cart->syncWithDTO($cartDTO);// TODO: пересмотреть логику
         $this->entityManager->flush();
         $cartData = $this->serializer->serialize($cart, 'json', ['groups' => 'cart']);
 

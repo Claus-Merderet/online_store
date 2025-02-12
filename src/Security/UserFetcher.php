@@ -17,10 +17,10 @@ readonly class UserFetcher implements UserFetcherInterface
 
     public function getAuthUser(): AuthUserInterface
     {
-        /** @var AuthUserInterface $user TODO: посмотреть */
+        /** @var AuthUserInterface $user*/
         $user = $this->security->getUser();
         Assert::notNull($user, 'Current user not found check security access list');
-        Assert::isInstanceOf($user, AuthUserInterface::class, sprintf('Invalid user type %s', \get_class($user)));
+        Assert::isInstanceOf($user, AuthUserInterface::class, sprintf('Invalid user type %s', get_class($user)));
 
         return $user;
     }

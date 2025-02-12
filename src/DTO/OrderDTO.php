@@ -4,9 +4,22 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
-class OrderDTO
+use App\Enum\DeliveryType;
+use App\Enum\NotificationType;
+
+readonly class OrderDTO
 {
-    public function __construct()
-    {
+    /**
+     * @param OrderProductDTO[] $orderProductsDTO
+     */
+    public function __construct(// TODO: добавить валидацию
+        public NotificationType $notificationType,
+        public array $orderProductsDTO,
+        public ?string $address,
+        public ?int $kladrId,
+        public ?string $userPhone,
+        public ?string $userEmail,
+        public DeliveryType $deliveryType,
+    ) {
     }
 }
