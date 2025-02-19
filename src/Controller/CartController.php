@@ -33,7 +33,10 @@ class CartController extends AbstractController
     ) {
     }
 
-    #[Route('/api/carts/{id}', name: 'cart_index', methods: ['POST'])]
+    #[Route('/api/carts/{id}', name: 'cart_index', methods: ['GET'])]
+    #[OA\Get(summary: 'Show cart')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY', message: 'Only auth user can view cart.')]
+    #[Security(name: 'Bearer')]
     public function index(#[MapEntity(id: 'id')] Cart $cart): JsonResponse
     {
         $errors = $this->cartService->checkPermission($cart->getUser(), $this->getUser(), $this->isGranted('ROLE_ADMIN'));

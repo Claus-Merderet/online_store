@@ -17,20 +17,29 @@ readonly class OrderService
 
     public function validateDTO(OrderDTO $orderDTO): JsonResponse|null
     {
-        foreach ($orderDTO->orderProductsDTO as $orderProductsDTO) {
-            $product = $this->productRepository->find($orderProductsDTO->productId);
-            if ($product === null) {
+        foreach ($orderDTO->orderProductsDTO as $orderProductDTO) {
+            if ($orderProductDTO->product->getPrice() !== $orderProductDTO->price || $orderProductDTO->product->getTax() !== $orderProductDTO->tax) {
                 return new JsonResponse(
-                    ['error' => 'Product not found. ID: ' . $orderProductsDTO->productId],
-                    Response::HTTP_BAD_REQUEST,
-                );
-            } elseif ($product->getPrice() !== $orderProductsDTO->price || $product->getTax() !== $orderProductsDTO->tax) {
-                return new JsonResponse(
-                    ['error' => 'The amount of items in the cart has changed. ID: ' . $orderProductsDTO->productId],
+                    ['error' => 'The amount of items in the cart has changed. ID: ' . $orderProductDTO->productId],
                     Response::HTTP_CONFLICT,
                 );
             }
-            $orderProductsDTO->product = $product;
+        }
+
+        return null;
+    }
+
+    public function fillOrderProducts(OrderDTO $orderDTO): JsonResponse|null
+    {
+        foreach ($orderDTO->orderProductsDTO as $orderProductDTO) {
+            $product = $this->productRepository->find($orderProductDTO->productId);
+            if ($product === null) {
+                return new JsonResponse(
+                    ['error' => 'Product not found. ID: ' . $orderProductDTO->productId],
+                    Response::HTTP_BAD_REQUEST,
+                );
+            }
+            $orderProductDTO->product = $product;
         }
 
         return null;

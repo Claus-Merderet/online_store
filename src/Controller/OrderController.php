@@ -6,18 +6,24 @@ namespace App\Controller;
 
 use App\DTO\ChangeOrderStatusDTO;
 use App\DTO\OrderDTO;
+use App\DTO\UpdateOrderDTO;
 use App\Entity\Cart;
 use App\Entity\Order;
+use App\Entity\OrderProducts;
 use App\Entity\OrderStatusHistory;
 use App\Entity\User;
+use App\Enum\OrderItemActionType;
 use App\Factory\OrderFactory;
+use App\Repository\OrderProductsRepository;
 use App\Repository\OrderRepository;
+use App\Repository\ProductRepository;
 use App\Security\UserFetcher;
 use App\Service\OrderService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
+use RuntimeException;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -39,6 +45,8 @@ class OrderController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly SerializerInterface $serializer,
         private readonly UserFetcher $userFetcher,
+        private readonly ProductRepository $productRepository,
+        private readonly OrderProductsRepository $orderProductsRepository,
     ) {
     }
 
@@ -51,8 +59,10 @@ class OrderController extends AbstractController
         validationFailedStatusCode: Response::HTTP_BAD_REQUEST,
     )] OrderDTO $orderDTO): JsonResponse
     {
-        $error = $this->orderService->validateDTO($orderDTO);
-        if ($error !== null) {
+        if (($error = $this->orderService->fillOrderProducts($orderDTO)) !== null) {
+            return $error;
+        }
+        if (($error = $this->orderService->validateDTO($orderDTO)) !== null) {
             return $error;
         }
         /** @var User $user */
@@ -122,7 +132,7 @@ class OrderController extends AbstractController
 
     #[Route('/api/orders', name: 'order_change_status', methods: ['PATCH'])]
     #[OA\Patch(summary: 'Change order status')]
-    #[IsGranted('ROLE_ADMIN', message: 'Only auth user can view orders.')]
+    #[IsGranted('ROLE_ADMIN', message: 'Only admin can change order status.')]
     #[Security(name: 'Bearer')]
     public function changeOrderStatus(#[MapRequestPayload] ChangeOrderStatusDTO $changeOrderStatusDTO): JsonResponse
     {
@@ -152,5 +162,60 @@ class OrderController extends AbstractController
                 Response::HTTP_INTERNAL_SERVER_ERROR,
             );
         }
+    }
+
+    #[Route('/api/orders/{id}', name: 'order_update', methods: ['PUT'])]
+    #[OA\Patch(summary: 'Update order')]
+    #[IsGranted('ROLE_ADMIN', message: 'Only admin can change order.')]
+    #[Security(name: 'Bearer')]
+    public function update(#[MapRequestPayload] UpdateOrderDTO $updateOrderDTO, #[MapEntity(id: 'id', message: 'The order does not exist')] Order $order): JsonResponse
+    {
+        $this->entityManager->beginTransaction();
+
+        try {
+            foreach ($updateOrderDTO->updateOrderItems as $orderItemDTO) {
+                $product = $this->productRepository->find($orderItemDTO->productId);
+                if ($product === null) {
+                    throw new RuntimeException('Product not found. ID: ' . $orderItemDTO->productId);
+                }
+
+                $orderProduct = $this->orderProductsRepository->findOneBy(['order' => $order, 'product' => $product,]);
+                if ($orderItemDTO->action === OrderItemActionType::ADD) {
+                    if ($orderProduct instanceof OrderProducts) {
+                        $orderProduct->setAmount($orderProduct->getAmount() + $orderItemDTO->quantity);
+                    } else {
+                        $orderProduct = new OrderProducts($order, $product, $orderItemDTO->quantity);
+                    }
+                    $this->entityManager->persist($orderProduct);
+                } elseif ($orderItemDTO->action === OrderItemActionType::REMOVE) {
+                    if ($orderProduct instanceof OrderProducts) {
+                        $newAmount = $orderProduct->getAmount() - $orderItemDTO->quantity;
+                        if ($newAmount < 1) {
+                            $this->entityManager->remove($orderProduct);
+                            $order->removeProduct($orderProduct);
+                        } else {
+                            $orderProduct->setAmount($newAmount);
+                            $this->entityManager->persist($orderProduct);
+                        }
+                    } else {
+                        throw new RuntimeException('The product to be deleted was not found in the order. ID: ' . $orderItemDTO->productId);
+                    }
+                }
+            }
+
+            $this->entityManager->flush();
+            $this->entityManager->commit();
+        } catch (Exception $e) {
+            $this->entityManager->rollback();
+
+            return new JsonResponse(
+                ['error' => 'Failed to update order: ' . $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+            );
+        }
+
+        $ordersData = $this->serializer->serialize($order, 'json', ['groups' => 'order:index']);
+
+        return new JsonResponse($ordersData, Response::HTTP_OK);
     }
 }

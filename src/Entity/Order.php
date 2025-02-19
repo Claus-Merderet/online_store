@@ -196,6 +196,15 @@ class Order
         return $this;
     }
 
+    public function removeProduct(OrderProducts $orderProducts): self
+    {
+        if ($this->orderProducts->contains($orderProducts)) {
+            $this->orderProducts->removeElement($orderProducts);
+        }
+
+        return $this;
+    }
+
     public function addStatusHistory(OrderStatusHistory $orderStatusHistory): self
     {
         if (!$this->orderStatusHistories->contains($orderStatusHistory)) {
