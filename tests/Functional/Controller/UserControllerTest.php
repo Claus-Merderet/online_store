@@ -7,6 +7,7 @@ namespace App\Tests\Functional\Controller;
 use App\DataFixtures\RoleFixtures;
 use App\DataFixtures\UserFixtures;
 use App\Entity\User;
+use App\Enum\RoleName;
 use App\Repository\UserRepository;
 use App\Tests\Traits\AuthTrait;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -81,7 +82,7 @@ class UserControllerTest extends WebTestCase
 
         $this->assertEquals('admin@example.com', $responseData['email']);
         $this->assertEquals('+79493223333', $responseData['phone']);
-        $this->assertContains(RoleFixtures::ROLE_ADMIN, $responseData['roles']);
+        $this->assertContains(RoleName::ADMIN->value, $responseData['roles']);
     }
 
     public function testGetAuthenticatedUserInvalidToken(): void

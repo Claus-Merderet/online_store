@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\DTO\ProductDTO;
 use App\Entity\Product;
+use App\Enum\RoleName;
 use App\Repository\ProductRepository;
 use App\Service\ProductService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -54,7 +55,7 @@ class ProductController extends AbstractController
         description: 'Creates a new product. Only accessible to users with the ADMIN role.',
         summary: 'Create a new product',
     )]
-    #[IsGranted('ROLE_ADMIN', message: 'Only admins can create products.')]
+    #[IsGranted(RoleName::ADMIN->value, message: 'Only admins can create products.')]
     #[Security(name: 'Bearer')]
     public function create(#[MapRequestPayload(
         acceptFormat: 'json',
@@ -80,9 +81,9 @@ class ProductController extends AbstractController
         );
     }
 
-    #[Route('/api/products', name: 'product_update', methods: ['PUT'])] // TODO: заменить название ролей на константы
+    #[Route('/api/products', name: 'product_update', methods: ['PUT'])]
     #[OA\Put(summary: 'Update a product')]
-    #[IsGranted('ROLE_ADMIN', message: 'Only admins can create products.')]
+    #[IsGranted(RoleName::ADMIN->value, message: 'Only admins can create products.')]
     #[Security(name: 'Bearer')]
     public function update(#[MapRequestPayload(
         acceptFormat: 'json',
@@ -111,7 +112,7 @@ class ProductController extends AbstractController
 
     #[Route('/api/products/{id}', name: 'product_delete', methods: ['DELETE'])]
     #[OA\Put(summary: 'Delete a product')]
-    #[IsGranted('ROLE_ADMIN', message: 'Only admins can delete products.')]
+    #[IsGranted(RoleName::ADMIN->value, message: 'Only admins can delete products.')]
     #[Security(name: 'Bearer')]
     public function delete(#[MapEntity(id: 'id')] Product $product): JsonResponse
     {

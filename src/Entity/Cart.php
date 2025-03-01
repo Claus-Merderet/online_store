@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\DTO\CartDto;
 use App\Repository\CartRepository;
 use DateTime;
 use DateTimeInterface;
@@ -84,20 +83,20 @@ class Cart
         return $this;
     }
 
+    public function removeCartItem(CartItem $cartItem): self
+    {
+        if ($this->cartItems->contains($cartItem)) {
+            $this->cartItems->removeElement($cartItem);
+        }
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, CartItem>
      */
     public function getCartItems(): Collection
     {
         return $this->cartItems;
-    }
-
-    public function syncWithDTO(CartDTO $cartDto): void
-    {
-        $this->cartItems = new ArrayCollection();
-        foreach ($cartDto->cartItems as $item) {
-            $this->addCartItem(new CartItem($item->product, $item->quantity));
-        }
-        $this->updatedAt = new DateTime();
     }
 }

@@ -6,6 +6,7 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Exception;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -20,8 +21,7 @@ readonly class UserProvider implements UserProviderInterface
     }
 
     /**
-     * @throws \Exception
-     * todo: посмотреть как улучшить
+     * @throws Exception
      */
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
@@ -33,7 +33,7 @@ readonly class UserProvider implements UserProviderInterface
         }
 
         if (!$user) {
-            throw new \Exception(sprintf('User with this credential "%s" not found.', $identifier));
+            throw new Exception(sprintf('User with this credential "%s" not found.', $identifier));
         }
 
         return $user;

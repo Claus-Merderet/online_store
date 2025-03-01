@@ -6,13 +6,14 @@ namespace App\DTO;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-class UpdateOrderDTO
+class OrderUpdateDTO
 {
     /**
-     * @param UpdateOrderItemDTO[] $updateOrderItems
+     * @param OrderItemUpdateDTO[] $updateOrderItems
      */
     public function __construct(
         #[Assert\NotBlank(message: 'updateOrderItems is required.')]
+        #[Assert\Valid]
         public array $updateOrderItems,
     ) {
     }

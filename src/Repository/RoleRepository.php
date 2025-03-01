@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Role;
+use App\Enum\RoleName;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
@@ -21,16 +22,16 @@ class RoleRepository extends ServiceEntityRepository
 
     public function getRoleUser(): ?Role
     {
-        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => 'ROLE_USER']);
+        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => RoleName::USER->value]);
     }
 
     public function getRoleAdmin(): ?Role
     {
-        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => 'ROLE_ADMIN']);
+        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => RoleName::ADMIN->value]);
     }
 
     public function getRoleSuperAdmin(): ?Role
     {
-        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => 'ROLE_SUPER_ADMIN']);
+        return $this->entityManager->getRepository(Role::class)->findOneBy(['roleName' => RoleName::SUPER_ADMIN->value]);
     }
 }

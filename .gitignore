@@ -43,3 +43,7 @@ phpstan.neon
 /.phpcs-cache
 /phpcs.xml
 ###< squizlabs/php_codesniffer ###
+
+###> reports ###
+/reports
+###< reports ###

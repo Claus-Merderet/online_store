@@ -6,6 +6,7 @@ namespace App\DataFixtures;
 
 use App\DTO\RegisterUserDTO;
 use App\Entity\Role;
+use App\Enum\RoleName;
 use App\Factory\UserFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -66,7 +67,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
                 'email' => self::USER_EMAIL,
                 'password' => self::USER_PASSWORD,
                 'promoId' => '',
-                'role' => RoleFixtures::ROLE_USER,
+                'role' => RoleName::USER->value,
                 'name' => 'Max',
             ],
             [
@@ -74,7 +75,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
                 'email' => self::ADMIN_EMAIL,
                 'password' => self::ADMIN_PASSWORD,
                 'promoId' => '',
-                'role' => RoleFixtures::ROLE_ADMIN,
+                'role' => RoleName::ADMIN->value,
                 'name' => 'Sam',
             ],
             [
@@ -82,7 +83,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
                 'email' => self::SUPER_ADMIN_EMAIL,
                 'password' => self::SUPER_ADMIN_PASSWORD,
                 'promoId' => '',
-                'role' => RoleFixtures::ROLE_SUPER_ADMIN,
+                'role' => RoleName::SUPER_ADMIN->value,
                 'name' => 'Bob',
             ],
         ];

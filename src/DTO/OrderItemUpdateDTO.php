@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
-use App\Enum\OrderItemActionType;
+use App\Enum\ItemActionType;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class UpdateOrderItemDTO
+class OrderItemUpdateDTO
 {
     public function __construct(
         #[Assert\NotBlank(message: 'productId is required.')]
@@ -15,7 +15,7 @@ class UpdateOrderItemDTO
         #[Assert\NotBlank(message: 'quantity is required.')]
         public int $quantity,
         #[Assert\NotBlank(message: 'action is required.')]
-        public OrderItemActionType $action,
+        public ItemActionType $action,
     ) {
     }
 }

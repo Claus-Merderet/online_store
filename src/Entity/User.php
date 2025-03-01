@@ -7,6 +7,7 @@ namespace App\Entity;
 use App\DTO\RegisterUserDTO;
 use App\Interface\AuthUserInterface;
 use App\Repository\UserRepository;
+use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -41,7 +42,7 @@ class User implements AuthUserInterface
     private ?string $email = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $birthday = null;
+    private ?DateTimeInterface $birthday = null;
 
     #[ORM\Column(length: 15, unique: true, nullable: true)] // TODO: сделать уникальным
     private ?string $phone = null;
@@ -54,7 +55,7 @@ class User implements AuthUserInterface
     private string $password;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $deletedAt = null;
+    private ?DateTimeInterface $deletedAt = null;
 
     /**
      * @var Collection<int, UserAddresses>
@@ -128,7 +129,7 @@ class User implements AuthUserInterface
 
     public function eraseCredentials(): void
     {
-        // TODO: Implement eraseCredentials() method.
+        //Implement eraseCredentials() method.
     }
 
     public function getUserIdentifier(): string

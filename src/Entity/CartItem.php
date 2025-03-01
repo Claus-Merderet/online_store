@@ -30,8 +30,9 @@ class CartItem
     #[Groups(['cart'])]
     private int $quantity;
 
-    public function __construct(Product $product, int $quantity)
+    public function __construct(Cart $cart, Product $product, int $quantity)
     {
+        $this->cart = $cart;
         $this->product = $product;
         $this->quantity = $quantity;
     }
@@ -41,19 +42,19 @@ class CartItem
         return $this->id;
     }
 
-    public function setId(int $id): static
+    public function setId(int $id): self
     {
         $this->id = $id;
 
         return $this;
     }
 
-    public function getProduct(): ?object
+    public function getProduct(): ?Product
     {
         return $this->product;
     }
 
-    public function setProduct(Product $product): static
+    public function setProduct(Product $product): self
     {
         $this->product = $product;
 
@@ -77,5 +78,10 @@ class CartItem
         $this->cart = $cart;
 
         return $this;
+    }
+
+    public function getCart(): ?Cart
+    {
+        return $this->cart;
     }
 }

@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\DTO\ChangeOrderStatusDTO;
+use App\DTO\OrderChangeStatusDTO;
 use App\DTO\OrderDTO;
-use App\DTO\UpdateOrderDTO;
+use App\DTO\OrderUpdateDTO;
 use App\Entity\Cart;
 use App\Entity\Order;
 use App\Entity\OrderProducts;
 use App\Entity\OrderStatusHistory;
 use App\Entity\User;
-use App\Enum\OrderItemActionType;
+use App\Enum\ItemActionType;
+use App\Enum\RoleName;
 use App\Factory\OrderFactory;
 use App\Repository\OrderProductsRepository;
 use App\Repository\OrderRepository;
@@ -100,7 +101,7 @@ class OrderController extends AbstractController
     {
         $user = $this->userFetcher->getAuthUser();
         $userId = $userId === 0 ? $user->getId() : $userId;
-        if ($userId !== $user->getId() && !$this->isGranted('ROLE_ADMIN')) {
+        if ($userId !== $user->getId() && !$this->isGranted(RoleName::ADMIN->value)) {
             return new JsonResponse('Only administrators can view orders of other users', Response::HTTP_FORBIDDEN);
         }
 
@@ -122,7 +123,7 @@ class OrderController extends AbstractController
     public function show(#[MapEntity(id: 'id')] Order $order): JsonResponse
     {
         $user = $this->userFetcher->getAuthUser();
-        if ($order->getUser()->getId() !== $user->getId() && !$this->isGranted('ROLE_ADMIN')) {
+        if ($order->getUser()->getId() !== $user->getId() && !$this->isGranted(RoleName::ADMIN->value)) {
             return new JsonResponse('Only administrators can view orders of other users', Response::HTTP_FORBIDDEN);
         }
         $ordersData = $this->serializer->serialize($order, 'json', ['groups' => 'order:index']);
@@ -132,9 +133,9 @@ class OrderController extends AbstractController
 
     #[Route('/api/orders', name: 'order_change_status', methods: ['PATCH'])]
     #[OA\Patch(summary: 'Change order status')]
-    #[IsGranted('ROLE_ADMIN', message: 'Only admin can change order status.')]
+    #[IsGranted(RoleName::ADMIN->value, message: 'Only admin can change order status.')]
     #[Security(name: 'Bearer')]
-    public function changeOrderStatus(#[MapRequestPayload] ChangeOrderStatusDTO $changeOrderStatusDTO): JsonResponse
+    public function changeOrderStatus(#[MapRequestPayload] OrderChangeStatusDTO $changeOrderStatusDTO): JsonResponse
     {
         $order = $this->orderRepository->find($changeOrderStatusDTO->orderId);
         if ($order === null) {
@@ -166,13 +167,13 @@ class OrderController extends AbstractController
 
     #[Route('/api/orders/{id}', name: 'order_update', methods: ['PUT'])]
     #[OA\Patch(summary: 'Update order')]
-    #[IsGranted('ROLE_ADMIN', message: 'Only admin can change order.')]
+    #[IsGranted(RoleName::ADMIN->value, message: 'Only admin can change order.')]
     #[Security(name: 'Bearer')]
-    public function update(#[MapRequestPayload] UpdateOrderDTO $updateOrderDTO, #[MapEntity(id: 'id', message: 'The order does not exist')] Order $order): JsonResponse
+    public function update(#[MapRequestPayload] OrderUpdateDTO $updateOrderDTO, #[MapEntity(id: 'id', message: 'The order does not exist')] Order $order): JsonResponse
     {
         $this->entityManager->beginTransaction();
 
-        try {
+        try {//TODO: вынести в сервис всю логику
             foreach ($updateOrderDTO->updateOrderItems as $orderItemDTO) {
                 $product = $this->productRepository->find($orderItemDTO->productId);
                 if ($product === null) {
@@ -180,14 +181,14 @@ class OrderController extends AbstractController
                 }
 
                 $orderProduct = $this->orderProductsRepository->findOneBy(['order' => $order, 'product' => $product,]);
-                if ($orderItemDTO->action === OrderItemActionType::ADD) {
+                if ($orderItemDTO->action === ItemActionType::ADD) {
                     if ($orderProduct instanceof OrderProducts) {
                         $orderProduct->setAmount($orderProduct->getAmount() + $orderItemDTO->quantity);
                     } else {
                         $orderProduct = new OrderProducts($order, $product, $orderItemDTO->quantity);
                     }
                     $this->entityManager->persist($orderProduct);
-                } elseif ($orderItemDTO->action === OrderItemActionType::REMOVE) {
+                } elseif ($orderItemDTO->action === ItemActionType::REMOVE) {
                     if ($orderProduct instanceof OrderProducts) {
                         $newAmount = $orderProduct->getAmount() - $orderItemDTO->quantity;
                         if ($newAmount < 1) {

@@ -62,18 +62,13 @@ readonly class UserService
         ];
     }
 
-    public function validateDTO(RegisterUserDTO $dto): JsonResponse|null
+    public function validateDTO(RegisterUserDTO $registerUserDTO): JsonResponse|null
     {
-        $errors = $this->validator->validate($dto);// TODO: похоже не надо
-
-        if (count($errors) > 0) {
-            return $this->createValidationErrorResponse($errors);
-        }
-        if (!empty($dto->email) && $this->userRepository->findOneByEmail($dto->email)) {
+        if (!empty($registerUserDTO->email) && $this->userRepository->findOneByEmail($registerUserDTO->email)) {
             return new JsonResponse(['error' => 'User with this email already exists.'], Response::HTTP_CONFLICT);
         }
 
-        if (!empty($dto->phone) && $this->userRepository->findOneByPhone($dto->phone)) {
+        if (!empty($registerUserDTO->phone) && $this->userRepository->findOneByPhone($registerUserDTO->phone)) {
             return new JsonResponse(
                 ['error' => 'User with this phone number already exists.'],
                 Response::HTTP_CONFLICT,
