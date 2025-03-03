@@ -16,6 +16,8 @@ migrate:
 	make symfony cmd="doctrine:migrations:migrate"
 migration:
 	make symfony cmd="make:migration"
+kafka:
+	make symfony cmd="app:consume-reports"
 analyse:
 	vendor/bin/phpstan --memory-limit=512M analyse
 fix:

@@ -3,6 +3,13 @@ parameters:
     paths:
         - src/
         - tests/
+    ignoreErrors:
+            -
+                message: '#While loop condition is always true.#'
+                path: src/Service/KafkaConsumerService.php
+            -
+                message: '#Method .* has parameter .* with no value type specified in iterable type array.#'
+                path: src/Service/KafkaProducerService.php
 services:
     -
         class: App\PHPStan\Rules\DeclareStrictTypesRule

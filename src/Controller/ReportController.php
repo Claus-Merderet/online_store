@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Report;
 use App\Enum\ReportType;
+use App\Service\KafkaProducerService;
 use App\Service\ReportGeneratorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,18 +18,27 @@ class ReportController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly ReportGeneratorService $generatorService,
+        private readonly KafkaProducerService $kafkaProducerService,
+        private readonly ReportGeneratorService $reportGeneratorService,
     ) {
     }
 
     #[Route('/api/report/sales', name: 'create_sales_report', methods: ['GET'])]
-    public function __invoke(): JsonResponse
+    public function create(): JsonResponse
     {
         $report = new Report(ReportType::DAILY_SALES_REPORT);
-        //        $this->entityManager->persist($report);
-        //        $this->entityManager->flush();
-        $this->generatorService->generateAsync($report);
+        $this->entityManager->persist($report);
+        $this->entityManager->flush();
+        $this->kafkaProducerService->sendMessage('report_topic', ['report_id' => $report->getId()]);
 
         return new JsonResponse(['report_id' => $report->getId()], Response::HTTP_OK);
+    }
+
+    #[Route('/api/report/sales1', name: 'create_sales_report1', methods: ['GET'])]
+    public function create1(): JsonResponse
+    {
+        $this->reportGeneratorService->generate('01955dd8-177a-74f0-8b0b-97fd5ddefdad');
+
+        return new JsonResponse(['report_id' => '01955dd8-177a-74f0-8b0b-97fd5ddefdad'], Response::HTTP_OK);
     }
 }

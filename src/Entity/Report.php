@@ -8,16 +8,17 @@ use App\Enum\ReportStatus;
 use App\Enum\ReportType;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 
+#[ORM\Entity]
 class Report
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private UuidInterface $id;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: 'Ramsey\Uuid\Doctrine\UuidGenerator')]
+    private string $id;
 
     #[ORM\Column(length: 20)]
     private ReportStatus $status = ReportStatus::PENDING;
@@ -28,22 +29,21 @@ class Report
     #[ORM\Column]
     private ReportType $reportType;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     private DateTimeInterface $createdAt;
 
     public function __construct(ReportType $reportType)
     {
-        $this->id = Uuid::uuid4();
         $this->reportType = $reportType;
         $this->createdAt = new DateTime();
     }
 
-    public function getId(): UuidInterface
+    public function getId(): string
     {
         return $this->id;
     }
 
-    public function setId(Uuid $id): void
+    public function setId(string $id): void
     {
         $this->id = $id;
     }

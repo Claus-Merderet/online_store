@@ -8,34 +8,20 @@ use App\Enum\NotificationType;
 
 class NotificationService
 {
+    public function __construct(private readonly KafkaProducerService $kafkaProducerService)
+    {
+    }
+
     public function sendNotification(NotificationType $type, string $recipient, ?string $promoId): void
     {
         $response = [
-            'type' => $type->value,
             'promoId' => $promoId,
         ];
         if ($type === NotificationType::SMS) {
             $response['userPhone'] = $recipient;
-            $this->sendSms($response);
         } elseif ($type === NotificationType::EMAIL) {
             $response['userEmail'] = $recipient;
-            $this->sendEmail($response);
         }
-    }
-
-    /**
-     * @param array<string, mixed> $data
-     */
-    private function sendSms(array $data): void
-    {
-        // TODO: Логика отправки SMS
-    }
-
-    /**
-     * @param array<string, mixed> $data
-     */
-    private function sendEmail(array $data): void
-    {
-        // TODO: Логика отправки email
+        $this->kafkaProducerService->sendMessage('topic_notification' . $type->value, $response);
     }
 }

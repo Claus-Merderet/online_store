@@ -14,8 +14,6 @@ use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Validator\ConstraintViolationListInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 readonly class UserService
 {
@@ -24,7 +22,6 @@ readonly class UserService
     public function __construct(
         private UserRepository $userRepository,
         private RoleRepository $roleRepository,
-        private ValidatorInterface $validator,
         private UserFactory $userFactory,
         private JWTTokenManagerInterface $JWTTokenManager,
         private RefreshTokenGeneratorInterface $refreshTokenGenerator,
@@ -76,21 +73,5 @@ readonly class UserService
         }
 
         return null;
-    }
-
-    private function createValidationErrorResponse(ConstraintViolationListInterface $violations): JsonResponse
-    {
-        $errors = [];
-        foreach ($violations as $violation) {
-            $errors[] = [
-                'field' => $violation->getPropertyPath(),
-                'message' => $violation->getMessage(),
-            ];
-        }
-
-        return new JsonResponse(
-            ['error' => 'Validation failed', 'errors' => $errors],
-            Response::HTTP_UNPROCESSABLE_ENTITY,
-        );
     }
 }

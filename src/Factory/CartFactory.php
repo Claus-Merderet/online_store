@@ -20,6 +20,7 @@ class CartFactory
         $cart = new Cart($user);
         foreach ($cartDTO->cartItems as $item) {
             $cartItem = new CartItem(
+                $cart,
                 $item->product,
                 $item->quantity,
             );
