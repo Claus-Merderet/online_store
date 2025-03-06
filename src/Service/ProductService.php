@@ -11,10 +11,10 @@ use App\Factory\ProductFactory;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 readonly class ProductService
 {
@@ -22,21 +22,27 @@ readonly class ProductService
 
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private ValidatorInterface $validator,
         private ProductRepository $productRepository,
         private ProductFactory $productFactory,
     ) {
     }
 
-    public function validateDTO(ProductDTO $dto): ?JsonResponse
+    public function assertProductDoesNotExist(int $id): void
     {
-        $errors = $this->validator->validate($dto);
+        $product = $this->productRepository->find($id);
+        if ($product !== null) {
+            throw new RuntimeException('A product with this id already exists. ID: ' . $id);
+        }
+    }
 
-        if (count($errors) > 0) {
-            return $this->createValidationErrorResponse($errors);
+    public function findProductOrFail(int $id): Product
+    {
+        $product = $this->productRepository->find($id);
+        if ($product === null) {
+            throw new RuntimeException('A product with this id not found. ID: ' . $id);
         }
 
-        return null;
+        return $product;
     }
 
     private function createValidationErrorResponse(ConstraintViolationListInterface $violations): JsonResponse

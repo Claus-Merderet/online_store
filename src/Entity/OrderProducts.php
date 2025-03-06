@@ -10,7 +10,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: OrderProductsRepository::class)]
 #[ORM\Table(name: '`order_products`')]
-class OrderProducts
+class OrderProducts //TODO убрать мн.ч
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

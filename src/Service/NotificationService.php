@@ -4,24 +4,27 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\DTO\RegisterUserDTO;
 use App\Enum\NotificationType;
 
-class NotificationService
+readonly class NotificationService
 {
-    public function __construct(private readonly KafkaProducerService $kafkaProducerService)
+    public function __construct(private KafkaProducerService $kafkaProducerService)
     {
     }
 
-    public function sendNotification(NotificationType $type, string $recipient, ?string $promoId): void
+    public function sendNotification(RegisterUserDTO $registerUserDTO): void
     {
-        $response = [
-            'promoId' => $promoId,
-        ];
-        if ($type === NotificationType::SMS) {
-            $response['userPhone'] = $recipient;
-        } elseif ($type === NotificationType::EMAIL) {
-            $response['userEmail'] = $recipient;
+        $notificationType = $registerUserDTO->email ? NotificationType::EMAIL : NotificationType::SMS;
+        if ($notificationType === NotificationType::SMS) {
+            $response['userPhone'] = $registerUserDTO->phone;
+        } else {
+            $response['userEmail'] = $registerUserDTO->email;
         }
-        $this->kafkaProducerService->sendMessage('topic_notification' . $type->value, $response);
+        $response = [
+            'promoId' => $registerUserDTO->promoId,
+        ];
+
+        $this->kafkaProducerService->sendMessage('topic_notification' . $notificationType->value, $response);
     }
 }

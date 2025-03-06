@@ -12,8 +12,7 @@ use App\Repository\UserRepository;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
+use RuntimeException;
 
 readonly class UserService
 {
@@ -59,19 +58,14 @@ readonly class UserService
         ];
     }
 
-    public function validateDTO(RegisterUserDTO $registerUserDTO): JsonResponse|null
+    public function validateDTO(RegisterUserDTO $registerUserDTO): void
     {
         if (!empty($registerUserDTO->email) && $this->userRepository->findOneByEmail($registerUserDTO->email)) {
-            return new JsonResponse(['error' => 'User with this email already exists.'], Response::HTTP_CONFLICT);
+            throw new RuntimeException('User with this email already exists.');
         }
 
         if (!empty($registerUserDTO->phone) && $this->userRepository->findOneByPhone($registerUserDTO->phone)) {
-            return new JsonResponse(
-                ['error' => 'User with this phone number already exists.'],
-                Response::HTTP_CONFLICT,
-            );
+            throw new RuntimeException('User with this phone number already exists.');
         }
-
-        return null;
     }
 }

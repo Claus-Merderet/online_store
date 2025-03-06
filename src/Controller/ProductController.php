@@ -10,6 +10,7 @@ use App\Enum\RoleName;
 use App\Repository\ProductRepository;
 use App\Service\ProductService;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -62,23 +63,20 @@ class ProductController extends AbstractController
         validationFailedStatusCode: Response::HTTP_BAD_REQUEST,
     )] ProductDTO $productDTO): JsonResponse
     {
-        $validationErrors = $this->productService->validateDTO($productDTO);
-        if ($validationErrors !== null) {
-            return $validationErrors;
-        }
+        try {
+            $this->productService->assertProductDoesNotExist($productDTO->id);
+            $product = $this->productService->createProduct($productDTO);
 
-        if ($this->productRepository->find($productDTO->id) !== null) {
             return new JsonResponse(
-                ['error' => 'Product with this ID already exists: ' . $productDTO->id],
-                Response::HTTP_BAD_REQUEST,
+                ['message' => 'Product created successfully', 'id' => $product->getId()],
+                Response::HTTP_CREATED,
+            );
+        } catch (Exception $e) {
+            return new JsonResponse(
+                ['error' => 'Failed to create a product: ' . $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR,
             );
         }
-        $product = $this->productService->createProduct($productDTO);
-
-        return new JsonResponse(
-            ['message' => 'Product created successfully', 'id' => $product->getId()],
-            Response::HTTP_CREATED,
-        );
     }
 
     #[Route('/api/products', name: 'product_update', methods: ['PUT'])]
@@ -90,24 +88,20 @@ class ProductController extends AbstractController
         validationFailedStatusCode: Response::HTTP_BAD_REQUEST,
     )] ProductDTO $productDTO): JsonResponse
     {
-        $validationErrors = $this->productService->validateDTO($productDTO);
-        if ($validationErrors !== null) {
-            return $validationErrors;
-        }
-        $product = $this->productRepository->find($productDTO->id);
+        try {
+            $product = $this->productService->findProductOrFail($productDTO->id);
+            $this->productService->updateProduct($product, $productDTO);
 
-        if ($product === null) {
             return new JsonResponse(
-                ['error' => 'Product not found', 'id' => $productDTO->id],
-                Response::HTTP_BAD_REQUEST,
+                ['message' => 'Product updated successfully'],
+                Response::HTTP_ACCEPTED,
+            );
+        } catch (Exception $e) {
+            return new JsonResponse(
+                ['error' => 'Failed to create a product: ' . $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR,
             );
         }
-        $this->productService->updateProduct($product, $productDTO);
-
-        return new JsonResponse(
-            ['message' => 'Product updated successfully'],
-            Response::HTTP_ACCEPTED,
-        );
     }
 
     #[Route('/api/products/{id}', name: 'product_delete', methods: ['DELETE'])]
@@ -116,12 +110,19 @@ class ProductController extends AbstractController
     #[Security(name: 'Bearer')]
     public function delete(#[MapEntity(id: 'id')] Product $product): JsonResponse
     {
-        $this->entityManager->remove($product);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->remove($product);
+            $this->entityManager->flush();
 
-        return new JsonResponse(
-            ['message' => 'Product removed successfully. ID: ' . $product->getId()],
-            Response::HTTP_ACCEPTED,
-        );
+            return new JsonResponse(
+                ['message' => 'Product removed successfully. ID: ' . $product->getId()],
+                Response::HTTP_ACCEPTED,
+            );
+        } catch (Exception $e) {
+            return new JsonResponse(
+                ['error' => 'Failed to delete a product: ' . $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+            );
+        }
     }
 }

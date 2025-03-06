@@ -26,7 +26,18 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return null|array{id: int, name: string, description: null|string, price: int, tax: int, version: int, weight: int, height: int, width: int, length: int}
+     * @return null|array{
+     *     id: int,
+     *     name: string,
+     *     description: null|string,
+     *     price: int,
+     *     tax: int,
+     *     version: int,
+     *     weight: int,
+     *     height: int,
+     *     width: int,
+     *     length: int
+     *    }
      */
     public function findByIdAsArray(int $id): array|null
     {

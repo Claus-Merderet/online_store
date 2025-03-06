@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\DTO\RegisterUserDTO;
-use App\Enum\NotificationType;
 use App\Security\UserFetcher;
 use App\Service\NotificationService;
 use App\Service\UserService;
+use Exception;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -67,25 +67,26 @@ class UserController extends AbstractController
             validationFailedStatusCode: Response::HTTP_BAD_REQUEST,
         )] RegisterUserDTO $registerUserDTO,
     ): JsonResponse {
-        $validationErrors = $this->userService->validateDTO($registerUserDTO);
-        if ($validationErrors !== null) {
-            return $validationErrors;
+        try {
+            $this->userService->validateDTO($registerUserDTO);
+            $user = $this->userService->registerUser($registerUserDTO);
+            $tokens = $this->userService->generateTokens($user);
+            $this->notificationService->sendNotification($registerUserDTO);
+
+            return new JsonResponse([
+                'message' => 'User registered and authenticated successfully.',
+                'user_id' => $user->getId(),
+                'tokens' => [
+                    'access_token' => $tokens['access_token'],
+                    'refresh_token' => $tokens['refresh_token'],
+                ],
+            ], Response::HTTP_CREATED);
+        } catch (Exception $e) {
+            return new JsonResponse(
+                ['error' => 'Failed to register user: ' . $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+            );
         }
-        $notificationType = $registerUserDTO->email ? NotificationType::EMAIL : NotificationType::SMS;
-        $recipient = $registerUserDTO->email ?? $registerUserDTO->phone;
-
-        $user = $this->userService->registerUser($registerUserDTO);
-        $tokens = $this->userService->generateTokens($user);
-        $this->notificationService->sendNotification($notificationType, $recipient, $registerUserDTO->promoId);
-
-        return new JsonResponse([
-            'message' => 'User registered and authenticated successfully.',
-            'user_id' => $user->getId(),
-            'tokens' => [
-                'access_token' => $tokens['access_token'],
-                'refresh_token' => $tokens['refresh_token'],
-            ],
-        ], Response::HTTP_CREATED);
     }
 
     #[Route('/api/users/me', name: 'api_user_me', methods: ['GET'])]
@@ -107,24 +108,22 @@ class UserController extends AbstractController
         ),
     )]
     #[Security(name: 'Bearer')]
-    public function getAuthenticatedUser(): JsonResponse
+    public function index(): JsonResponse
     {
-        $user = $this->userFetcher->getAuthUser();
+        try {
+            $user = $this->userFetcher->getAuthUser();
 
-        return new JsonResponse([
-            'id' => $user->getId(),
-            'phone' => $user->getPhone(),
-            'email' => $user->getEmail(),
-            'roles' => $user->getRoles(),
-        ], Response::HTTP_OK);
-    }
-
-    #[Route('/api/users/logout', name: 'api_user_logout', methods: ['POST'])]
-    public function logoutUser(): JsonResponse
-    {
-        //$resp = $this->security->logout();
-        //TODO: не работает. похоже не нужно, фронт просто будет забывать accessToken и refreshToken или все же нет
-
-        return new JsonResponse(Response::HTTP_OK);
+            return new JsonResponse([
+                'id' => $user->getId(),
+                'phone' => $user->getPhone(),
+                'email' => $user->getEmail(),
+                'roles' => $user->getRoles(),
+            ], Response::HTTP_OK);
+        } catch (Exception $e) {
+            return new JsonResponse(
+                ['error' => 'Failed to index user: ' . $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+            );
+        }
     }
 }
