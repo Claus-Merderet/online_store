@@ -55,6 +55,8 @@ class ProductFixtures extends Fixture
         ],
     ];
 
+    public const PRODUCT_REFERENCE = 'product-';
+
     public function __construct(
         private readonly ProductFactory $productFactory,
         private readonly SerializerInterface $serializer,
@@ -63,7 +65,7 @@ class ProductFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        foreach (self::PRODUCTS_DATA as $productData) {
+        foreach (self::PRODUCTS_DATA as $index => $productData) {
             $productDTO = $this->serializer->deserialize(
                 json_encode($productData),
                 ProductDTO::class,
@@ -71,6 +73,7 @@ class ProductFixtures extends Fixture
             );
             $product = $this->productFactory->create($productDTO);
             $manager->persist($product);
+            $this->addReference(self::PRODUCT_REFERENCE . $index, $product);
         }
 
         $manager->flush();

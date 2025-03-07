@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\DTO\CartDto;
+use App\DTO\CartDTO;
 use App\DTO\CartUpdateDTO;
 use App\Entity\Cart;
 use App\Entity\CartItem;
@@ -31,7 +31,7 @@ readonly class CartService
 
     public function fillProductsDTO(CartDTO $cartDTO): void
     {
-        foreach ($cartDTO->cartItems as $item) {
+        foreach ($cartDTO->cartItem as $item) {
             $product = $this->productRepository->find($item->productId);
             if ($product === null) {
                 throw new RuntimeException('Product not found. ID:' . $item->productId);

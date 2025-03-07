@@ -51,6 +51,19 @@ class ReportGeneratorService
                 usort($result, function ($a, $b) {
                     return $a['product_id'] <=> $b['product_id'] ?: $a['user_id'] <=> $b['user_id'];
                 });
+
+                foreach ($result as $product) {
+                    $line = json_encode([
+                        'product_name' => $product['product_name'],
+                        'price' => $product['price'],
+                        'amount' => $product['amount'],
+                        'product_id' => $product['product_id'],
+                        'user' => [
+                            'id' => $product['user_id'],
+                        ],
+                    ]);
+                    $this->filesystem->appendToFile($reportFilePath, $line . PHP_EOL);
+                }
             }
 
             $report->setFilePath($reportFilePath);

@@ -134,7 +134,7 @@ class OrderController extends AbstractController
     }
 
     #[Route('/api/orders/{id}', name: 'order_update', methods: ['PUT'])]
-    #[OA\Patch(summary: 'Update order')]
+    #[OA\Put(summary: 'Update order')]
     #[IsGranted(RoleName::ADMIN->value, message: 'Only admin can change order.')]
     #[Security(name: 'Bearer')]
     public function update(

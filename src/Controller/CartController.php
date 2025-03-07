@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\DTO\CartDto;
+use App\DTO\CartDTO;
 use App\DTO\CartUpdateDTO;
 use App\Entity\Cart;
 use App\Enum\RoleName;

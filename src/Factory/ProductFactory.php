@@ -7,7 +7,7 @@ namespace App\Factory;
 use App\DTO\ProductDTO;
 use App\Entity\Product;
 
-class ProductFactory
+final readonly class ProductFactory
 {
     public function create(ProductDTO $productDTO): Product
     {

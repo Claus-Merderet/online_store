@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace App\Factory;
 
-use App\DTO\CartDto;
+use App\DTO\CartDTO;
 use App\Entity\Cart;
 use App\Entity\CartItem;
 use App\Entity\User;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Webmozart\Assert\Assert;
 
-class CartFactory
+final readonly class CartFactory
 {
     public function create(CartDTO $cartDTO, UserInterface $user): Cart
     {
-        if (!$user instanceof User) {
-            throw new \InvalidArgumentException('Expected instance of App\Entity\User');
-        }
+        /* @var User $user */
+        Assert::isInstanceOf($user, User::class, sprintf('Invalid user type %s', get_class($user)));
         $cart = new Cart($user);
-        foreach ($cartDTO->cartItems as $item) {
+        foreach ($cartDTO->cartItem as $item) {
             $cartItem = new CartItem(
                 $cart,
                 $item->product,

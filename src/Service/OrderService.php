@@ -58,8 +58,6 @@ readonly class OrderService
 
     public function createOrder(UserInterface $user, OrderDTO $orderDTO): Order
     {
-        /* @var User $user */
-        Assert::isInstanceOf($user, User::class, sprintf('Invalid user type %s', get_class($user)));
         $order = $this->orderFactory->create($orderDTO, $user);
         $this->entityManager->persist($order);
         $cart = $this->entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);

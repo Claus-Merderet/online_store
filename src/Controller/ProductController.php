@@ -105,7 +105,7 @@ class ProductController extends AbstractController
     }
 
     #[Route('/api/products/{id}', name: 'product_delete', methods: ['DELETE'])]
-    #[OA\Put(summary: 'Delete a product')]
+    #[OA\Delete(summary: 'Delete a product')]
     #[IsGranted(RoleName::ADMIN->value, message: 'Only admins can delete products.')]
     #[Security(name: 'Bearer')]
     public function delete(#[MapEntity(id: 'id')] Product $product): JsonResponse

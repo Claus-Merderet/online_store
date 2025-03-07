@@ -9,6 +9,7 @@ use App\Enum\ReportType;
 use App\Service\KafkaProducerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +24,7 @@ class ReportController extends AbstractController
     }
 
     #[Route('/api/report/sales', name: 'create_sales_report', methods: ['GET'])]
+    #[OA\Get(summary: 'Generate report sales')]
     public function create(): JsonResponse
     {
         try {

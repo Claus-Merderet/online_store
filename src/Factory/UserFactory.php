@@ -9,7 +9,7 @@ use App\Entity\Role;
 use App\Entity\User;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-readonly class UserFactory
+final readonly class UserFactory
 {
     public function __construct(private UserPasswordHasherInterface $passwordHasher)
     {

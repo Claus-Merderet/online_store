@@ -10,11 +10,15 @@ use App\Entity\OrderProducts;
 use App\Entity\OrderStatusHistory;
 use App\Entity\User;
 use App\Enum\StatusName;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Webmozart\Assert\Assert;
 
-class OrderFactory
+final readonly class OrderFactory
 {
-    public function create(OrderDTO $orderDTO, User $user): Order
+    public function create(OrderDTO $orderDTO, UserInterface $user): Order
     {
+        /* @var User $user */
+        Assert::isInstanceOf($user, User::class, sprintf('Invalid user type %s', get_class($user)));
         $order = new Order(
             $orderDTO->notificationType,
             $user,

@@ -32,6 +32,8 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
 
     public const SUPER_ADMIN_PASSWORD = 'test123!';
 
+    public const USER_REFERENCE = 'user-';
+
     public function __construct(
         private readonly UserFactory $userFactory,
     ) {
@@ -39,11 +41,12 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
-        foreach (self::getUsersData() as $userData) {
+        foreach (self::getUsersData() as $index => $userData) {
             $dto = $this->createRegisterUserDTO($userData);
             $role = $this->getReference($userData['role'], Role::class);
             $user = $this->userFactory->create($dto, $role);
             $manager->persist($user);
+            $this->addReference(self::USER_REFERENCE . $index, $user);
         }
 
         $manager->flush();
@@ -57,7 +60,13 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
     }
 
     /**
-     * @return array<array{phone: string, email: string, password: string, promoId: string, role: string}>
+     * @return array{
+     *     phone: string,
+     *     email: string,
+     *     password: string,
+     *     promoId: string,
+     *     role: string
+     * }
      */
     private static function getUsersData(): array
     {

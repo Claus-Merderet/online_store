@@ -6,15 +6,15 @@ namespace App\DTO;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-class CartDto
+class CartDTO
 {
     /**
-     *  @param CartItemDTO[] $cartItems
+     *  @param CartItemDTO[] $cartItem
      */
     public function __construct(
-        #[Assert\NotBlank(message: 'The CartItems field is required.')]
+        #[Assert\NotBlank(message: 'The CartItem field is required.')]
         #[Assert\Valid]
-        public array $cartItems,
+        public array $cartItem,
     ) {
     }
 }
