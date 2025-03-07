@@ -99,7 +99,7 @@ readonly class OrderService
         }
     }
 
-    public function findOrder($orderId): Order
+    public function findOrder(int $orderId): Order
     {
         $order = $this->orderRepository->find($orderId);
         if ($order === null) {

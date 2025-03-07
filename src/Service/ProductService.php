@@ -12,9 +12,6 @@ use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use RuntimeException;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 readonly class ProductService
 {
@@ -43,22 +40,6 @@ readonly class ProductService
         }
 
         return $product;
-    }
-
-    private function createValidationErrorResponse(ConstraintViolationListInterface $violations): JsonResponse
-    {
-        $errors = [];
-        foreach ($violations as $violation) {
-            $errors[] = [
-                'field' => $violation->getPropertyPath(),
-                'message' => $violation->getMessage(),
-            ];
-        }
-
-        return new JsonResponse(
-            ['error' => 'Validation failed', 'errors' => $errors],
-            Response::HTTP_UNPROCESSABLE_ENTITY,
-        );
     }
 
     public function createProduct(ProductDTO $productDTO): Product

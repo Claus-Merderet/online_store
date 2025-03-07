@@ -7,13 +7,15 @@ up:
 down:
 	docker compose down
 symfony:
-	docker exec -it $(PHP_CONTAINER) php bin/console $(cmd)
-
+	docker exec -it $(PHP_CONTAINER) php-fpm bash $(cmd)
+bash:
+	docker compose exec php bash
 entity:
 	make symfony cmd="make:entity"
-
 migrate:
 	make symfony cmd="doctrine:migrations:migrate"
+migrate_test:
+	make symfony cmd="doctrine:migrations:migrate --env=test"
 migration:
 	make symfony cmd="make:migration"
 kafka:

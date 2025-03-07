@@ -51,7 +51,7 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
                 $product->getPrice(),
                 rand(1, 10),
                 $product->getTax(),
-                $product
+                $product,
             );
         }
 

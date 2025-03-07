@@ -7,7 +7,6 @@ namespace App\Controller;
 use App\DTO\ProductDTO;
 use App\Entity\Product;
 use App\Enum\RoleName;
-use App\Repository\ProductRepository;
 use App\Service\ProductService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -27,7 +26,6 @@ class ProductController extends AbstractController
 {
     public function __construct(
         private readonly ProductService $productService,
-        private readonly ProductRepository $productRepository,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }

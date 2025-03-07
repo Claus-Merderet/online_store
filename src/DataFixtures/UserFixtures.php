@@ -60,13 +60,13 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
     }
 
     /**
-     * @return array{
+     * @return array<array{
      *     phone: string,
      *     email: string,
      *     password: string,
      *     promoId: string,
      *     role: string
-     * }
+     * }>
      */
     private static function getUsersData(): array
     {
