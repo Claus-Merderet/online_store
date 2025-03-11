@@ -47,3 +47,5 @@ phpstan.neon
 ###> reports ###
 /reports
 ###< reports ###
+.idea/
+.github/
