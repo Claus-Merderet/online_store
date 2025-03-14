@@ -12,7 +12,6 @@ use App\Enum\RoleName;
 use App\Repository\OrderRepository;
 use App\Security\UserFetcher;
 use App\Service\OrderService;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
@@ -32,7 +31,6 @@ class OrderController extends AbstractController
     public function __construct(
         private readonly OrderService $orderService,
         private readonly OrderRepository $orderRepository,
-        private readonly EntityManagerInterface $entityManager,
         private readonly SerializerInterface $serializer,
         private readonly UserFetcher $userFetcher,
     ) {
@@ -47,8 +45,6 @@ class OrderController extends AbstractController
         validationFailedStatusCode: Response::HTTP_BAD_REQUEST,
     )] OrderDTO $orderDTO): JsonResponse
     {
-        $this->entityManager->beginTransaction();
-
         try {
             $this->orderService->fillOrderProducts($orderDTO);
             $this->orderService->validateDTO($orderDTO);
@@ -59,8 +55,6 @@ class OrderController extends AbstractController
                 Response::HTTP_CREATED,
             );
         } catch (Exception $e) {
-            $this->entityManager->rollback();
-
             return new JsonResponse(
                 ['error' => 'Failed to create order: ' . $e->getMessage()],
                 Response::HTTP_INTERNAL_SERVER_ERROR,

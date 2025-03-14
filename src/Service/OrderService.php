@@ -65,7 +65,6 @@ readonly class OrderService
             $this->entityManager->remove($cart);
         }
         $this->entityManager->flush();
-        $this->entityManager->commit();
 
         return $order;
     }
@@ -82,21 +81,12 @@ readonly class OrderService
      */
     public function changeStatus(UserInterface $user, Order $order, OrderChangeStatusDTO $changeOrderStatusDTO): void
     {
-        $this->entityManager->beginTransaction();
-
-        try {
-            /* @var User $user */
-            Assert::isInstanceOf($user, User::class, sprintf('Invalid user type %s', get_class($user)));
-            $statusHistory = new OrderStatusHistory($order, $changeOrderStatusDTO->statusName, '', $user);
-            $order->addStatusHistory($statusHistory);
-            $this->entityManager->persist($statusHistory);
-            $this->entityManager->flush();
-            $this->entityManager->commit();
-        } catch (Exception $e) {
-            $this->entityManager->rollback();
-
-            throw $e;
-        }
+        /* @var User $user */
+        Assert::isInstanceOf($user, User::class, sprintf('Invalid user type %s', get_class($user)));
+        $statusHistory = new OrderStatusHistory($order, $changeOrderStatusDTO->statusName, '', $user);
+        $order->addStatusHistory($statusHistory);
+        $this->entityManager->persist($statusHistory);
+        $this->entityManager->flush();
     }
 
     public function findOrder(int $orderId): Order
@@ -114,34 +104,25 @@ readonly class OrderService
      */
     public function updateOrder(Order $order, OrderUpdateDTO $orderUpdateDTO): Order
     {
-        $this->entityManager->beginTransaction();
-
-        try {
-            foreach ($orderUpdateDTO->updateOrderItems as $orderItemDTO) {
-                $product = $this->productRepository->find($orderItemDTO->productId);
-                if ($product === null) {
-                    throw new RuntimeException('Product not found. ID: ' . $orderItemDTO->productId);
-                }
-
-                $orderProduct = $this->orderProductsRepository->findOneBy(['order' => $order, 'product' => $product,]);
-                if ($orderItemDTO->action === ItemActionType::ADD) {
-                    $this->addOrUpdateOrderProducts($orderProduct, $order, $product, $orderItemDTO->quantity);
-                } elseif ($orderItemDTO->action === ItemActionType::REMOVE) {
-                    if ($orderProduct instanceof OrderProducts) {
-                        $this->removeOrUpdateOrderProducts($orderProduct, $order, $orderItemDTO->quantity);
-                    } else {
-                        throw new RuntimeException('The product to be deleted was not found in the order. ID: ' . $orderItemDTO->productId);
-                    }
-                }
+        foreach ($orderUpdateDTO->updateOrderItems as $orderItemDTO) {
+            $product = $this->productRepository->find($orderItemDTO->productId);
+            if ($product === null) {
+                throw new RuntimeException('Product not found. ID: ' . $orderItemDTO->productId);
             }
 
-            $this->entityManager->flush();
-            $this->entityManager->commit();
-        } catch (Exception $e) {
-            $this->entityManager->rollback();
-
-            throw $e;
+            $orderProduct = $this->orderProductsRepository->findOneBy(['order' => $order, 'product' => $product,]);
+            if ($orderItemDTO->action === ItemActionType::ADD) {
+                $this->addOrUpdateOrderProducts($orderProduct, $order, $product, $orderItemDTO->quantity);
+            } elseif ($orderItemDTO->action === ItemActionType::REMOVE) {
+                if ($orderProduct instanceof OrderProducts) {
+                    $this->removeOrUpdateOrderProducts($orderProduct, $order, $orderItemDTO->quantity);
+                } else {
+                    throw new RuntimeException('The product to be deleted was not found in the order. ID: ' . $orderItemDTO->productId);
+                }
+            }
         }
+
+        $this->entityManager->flush();
 
         return $order;
     }

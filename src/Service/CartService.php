@@ -59,31 +59,22 @@ readonly class CartService
      */
     public function updateCart(Cart $cart, CartUpdateDTO $cartUpdateDTO): void
     {
-        $this->entityManager->beginTransaction();
-
-        try {
-            foreach ($cartUpdateDTO->cartItemUpdateDTO as $cartItemUpdateDTO) {
-                $product = $this->productRepository->find($cartItemUpdateDTO->productId);
-                if ($product === null) {
-                    throw new RuntimeException('Product not found. ID: ' . $cartItemUpdateDTO->productId);
-                }
-
-                $cartItem = $this->cartItemRepository->findOneBy(['cart' => $cart, 'product' => $product]);
-
-                if ($cartItemUpdateDTO->action === ItemActionType::ADD) {
-                    $this->addOrUpdateCartItem($cart, $product, $cartItemUpdateDTO->quantity, $cartItem);
-                } elseif ($cartItemUpdateDTO->action === ItemActionType::REMOVE) {
-                    $this->removeOrUpdateCartItem($cart, $product, $cartItemUpdateDTO->quantity, $cartItem);
-                }
+        foreach ($cartUpdateDTO->cartItemUpdateDTO as $cartItemUpdateDTO) {
+            $product = $this->productRepository->find($cartItemUpdateDTO->productId);
+            if ($product === null) {
+                throw new RuntimeException('Product not found. ID: ' . $cartItemUpdateDTO->productId);
             }
-            $cart->setUpdatedAt();
-            $this->entityManager->flush();
-            $this->entityManager->commit();
-        } catch (Exception $e) {
-            $this->entityManager->rollback();
 
-            throw $e;
+            $cartItem = $this->cartItemRepository->findOneBy(['cart' => $cart, 'product' => $product]);
+
+            if ($cartItemUpdateDTO->action === ItemActionType::ADD) {
+                $this->addOrUpdateCartItem($cart, $product, $cartItemUpdateDTO->quantity, $cartItem);
+            } elseif ($cartItemUpdateDTO->action === ItemActionType::REMOVE) {
+                $this->removeOrUpdateCartItem($cart, $product, $cartItemUpdateDTO->quantity, $cartItem);
+            }
         }
+        $cart->setUpdatedAt();
+        $this->entityManager->flush();
     }
 
     private function addOrUpdateCartItem(Cart $cart, Product $product, int $quantity, ?CartItem $cartItem): void
