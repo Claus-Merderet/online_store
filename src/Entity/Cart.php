@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\ItemActionType;
 use App\Repository\CartRepository;
 use DateTime;
 use DateTimeInterface;
@@ -11,6 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use RuntimeException;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CartRepository::class)]
@@ -73,12 +75,37 @@ class Cart
         return $this->createdAt;
     }
 
-    public function addCartItem(CartItem $cartItem): self
+    public function updateCartItem(Product $product, int $quantity, ItemActionType $actionType): void
     {
-        if (!$this->cartItems->contains($cartItem)) {
-            $this->cartItems[] = $cartItem;
-            $cartItem->setCart($this);
+        foreach ($this->cartItems as $existingItem) {
+            if ($existingItem->getProduct() === $product) {
+                if ($actionType === ItemActionType::ADD) {
+                    $existingItem->setQuantity($existingItem->getQuantity() + $quantity);
+
+                    return;
+                } elseif ($actionType === ItemActionType::REMOVE) {
+                    $newQuantity = $existingItem->getQuantity() - $quantity;
+                    if ($newQuantity < 1) {
+                        $this->cartItems->removeElement($existingItem);
+                    } else {
+                        $existingItem->setQuantity($newQuantity);
+                    }
+
+                    return;
+                }
+            }
         }
+        if ($actionType === ItemActionType::ADD) {
+            $this->addCartItem($product, $quantity);
+        } else {
+            throw new RuntimeException('The product to be deleted was not found in the cart. ID: ' . $product->getId());
+        }
+    }
+
+    public function addCartItem(Product $product, int $quantity): self
+    {
+        $cartItem = new CartItem($this, $product, $quantity);
+        $this->cartItems[] = $cartItem;
 
         return $this;
     }
