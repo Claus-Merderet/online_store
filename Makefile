@@ -7,7 +7,7 @@ up:
 down:
 	docker compose down
 symfony:
-	docker exec -it $(PHP_CONTAINER) php-fpm bash $(cmd)
+	docker exec -it $(PHP_CONTAINER) bin/console $(cmd)
 bash:
 	docker compose exec php bash
 entity:

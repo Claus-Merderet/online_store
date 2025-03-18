@@ -8,6 +8,7 @@ use App\DTO\OrderChangeStatusDTO;
 use App\DTO\OrderDTO;
 use App\DTO\OrderUpdateDTO;
 use App\Entity\Order;
+use App\Entity\User;
 use App\Enum\RoleName;
 use App\Repository\OrderRepository;
 use App\Security\UserFetcher;
@@ -24,6 +25,7 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
+use Webmozart\Assert\Assert;
 
 #[OA\Tag(name: 'Order')]
 class OrderController extends AbstractController
@@ -72,7 +74,7 @@ class OrderController extends AbstractController
             $user = $this->userFetcher->getAuthUser();
             $userId = $userId === 0 ? $user->getId() : $userId;
             $this->orderService->checkPermissions($userId === $user->getId(), $this->isGranted(RoleName::ADMIN->value));
-            $orders = $this->orderRepository->findByUserId($userId);
+            $orders = $this->orderRepository->findBy(['user' => $user]);
 
             return new JsonResponse(
                 $this->serializer->serialize($orders, 'json', ['groups' => 'order:index']),
@@ -116,7 +118,9 @@ class OrderController extends AbstractController
     {
         try {
             $order = $this->orderService->findOrder($changeOrderStatusDTO->orderId);
-            $this->orderService->changeStatus($this->getUser(), $order, $changeOrderStatusDTO);
+            /* @var User $user */
+            Assert::isInstanceOf($user, User::class, sprintf('Invalid user type %s', get_class($user)));
+            $order->addStatusHistory($changeOrderStatusDTO->statusName, $changeOrderStatusDTO->comment, $user);
 
             return new JsonResponse(status: Response::HTTP_OK);
         } catch (Exception $e) {

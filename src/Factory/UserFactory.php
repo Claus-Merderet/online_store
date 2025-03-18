@@ -17,9 +17,6 @@ final readonly class UserFactory
 
     public function create(RegisterUserDTO $registerUserDTO, Role $role): User
     {
-        $user = new User($registerUserDTO, $role);
-        $user->setPassword($registerUserDTO->password, $this->passwordHasher);
-
-        return $user;
+        return new User($registerUserDTO, $role, $registerUserDTO->password, $this->passwordHasher);
     }
 }

@@ -26,8 +26,7 @@ readonly class ProductService
 
     public function assertProductDoesNotExist(int $id): void
     {
-        $product = $this->productRepository->find($id);
-        if ($product !== null) {
+        if ($this->productRepository->find($id) !== null) {
             throw new RuntimeException('A product with this id already exists. ID: ' . $id);
         }
     }
@@ -45,7 +44,8 @@ readonly class ProductService
     public function createProduct(ProductDTO $productDTO): Product
     {
         $product = $this->productFactory->create($productDTO);
-        $this->productRepository->save($product);
+        $this->entityManager->persist($product);
+        $this->entityManager->flush();
 
         return $product;
     }

@@ -24,31 +24,34 @@ class User implements AuthUserInterface
 {
     #[Assert\Uuid(message: 'Invalid promoId. It must be a valid UUID.')]
     #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    #[Groups(['user:index'])]
     public ?string $promoId = null;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['order:index'])]
+    #[Groups(['order:index','user:index'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['order:index'])]
+    #[Groups(['order:index','user:index'])]
     private Role $role;
 
     #[ORM\Column(length: 255, unique: true, nullable: true)]
     #[Assert\Email]
+    #[Groups(['user:index'])]
     private ?string $email = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?DateTimeInterface $birthday = null;
 
     #[ORM\Column(length: 15, unique: true, nullable: true)] // TODO: сделать уникальным
+    #[Groups(['user:index'])]
     private ?string $phone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['order:index'])]
+    #[Groups(['order:index','user:index'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 64)]
@@ -72,12 +75,17 @@ class User implements AuthUserInterface
     #[ORM\OneToOne(targetEntity: Cart::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?Cart $cart = null;
 
-    public function __construct(RegisterUserDTO $registerUserDTO, Role $role)
-    {
+    public function __construct(
+        RegisterUserDTO $registerUserDTO,
+        Role $role,
+        string $password,
+        UserPasswordHasherInterface $passwordHasher,
+    ) {
         $this->email = $registerUserDTO->email ?? '';
         $this->phone = $registerUserDTO->phone ?? '';
         $this->promoId = $registerUserDTO->promoId ?? '';
         $this->role = $role;
+        $this->password = $passwordHasher->hashPassword($this, $password);
     }
 
     public function getId(): int

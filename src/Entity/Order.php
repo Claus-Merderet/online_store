@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Enum\DeliveryType;
 use App\Enum\NotificationType;
+use App\Enum\StatusName;
 use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -80,6 +81,34 @@ class Order
         $this->deliveryType = $deliveryType;
         $this->orderStatusHistories = new ArrayCollection();
         $this->orderProducts = new ArrayCollection();
+    }
+
+    public static function create(
+        NotificationType $notificationType,
+        User $user,
+        ?string $address,
+        ?int $kladrId,
+        ?string $userPhone,
+        DeliveryType $deliveryType,
+    ): self {
+        $order = new self(
+            $notificationType,
+            $user,
+            $address,
+            $kladrId,
+            $userPhone,
+            $deliveryType,
+        );
+
+        $order->addStatusHistory(StatusName::REQUIRES_PAYMENT, '', $user);
+
+        return $order;
+    }
+
+    public function addStatusHistory(StatusName $status, string $comment, User $user): void
+    {
+        $statusHistory = new OrderStatusHistory($this, $status, $comment, $user);
+        $this->orderStatusHistories->add($statusHistory);
     }
 
     public function getId(): int
@@ -187,28 +216,16 @@ class Order
         return $this->orderProducts;
     }
 
-    public function addProduct(OrderProducts $orderProducts): self
+    public function addProduct(Product $product, int $amount): void
     {
-        if (!$this->orderProducts->contains($orderProducts)) {
-            $this->orderProducts[] = $orderProducts;
-        }
-
-        return $this;
+        $orderProduct = new OrderProducts($this, $product, $amount);
+        $this->orderProducts->add($orderProduct);
     }
 
     public function removeProduct(OrderProducts $orderProducts): self
     {
         if ($this->orderProducts->contains($orderProducts)) {
             $this->orderProducts->removeElement($orderProducts);
-        }
-
-        return $this;
-    }
-
-    public function addStatusHistory(OrderStatusHistory $orderStatusHistory): self
-    {
-        if (!$this->orderStatusHistories->contains($orderStatusHistory)) {
-            $this->orderStatusHistories[] = $orderStatusHistory;
         }
 
         return $this;

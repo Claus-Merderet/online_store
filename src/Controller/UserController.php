@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[OA\Tag(name: 'User')]
 class UserController extends AbstractController
@@ -24,6 +25,7 @@ class UserController extends AbstractController
         private readonly UserService $userService,
         private readonly NotificationService $notificationService,
         private readonly UserFetcher $userFetcher,
+        private readonly SerializerInterface $serializer,
     ) {
     }
 
@@ -112,13 +114,9 @@ class UserController extends AbstractController
     {
         try {
             $user = $this->userFetcher->getAuthUser();
+            $userData = $this->serializer->serialize($user, 'json', ['groups' => 'user:index']);
 
-            return new JsonResponse([
-                'id' => $user->getId(),
-                'phone' => $user->getPhone(),
-                'email' => $user->getEmail(),
-                'roles' => $user->getRoles(),
-            ], Response::HTTP_OK);
+            return new JsonResponse($userData, Response::HTTP_OK);
         } catch (Exception $e) {
             return new JsonResponse(
                 ['error' => 'Failed to index user: ' . $e->getMessage()],

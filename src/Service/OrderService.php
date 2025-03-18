@@ -76,19 +76,6 @@ readonly class OrderService
         }
     }
 
-    /**
-     * @throws Exception
-     */
-    public function changeStatus(UserInterface $user, Order $order, OrderChangeStatusDTO $changeOrderStatusDTO): void
-    {
-        /* @var User $user */
-        Assert::isInstanceOf($user, User::class, sprintf('Invalid user type %s', get_class($user)));
-        $statusHistory = new OrderStatusHistory($order, $changeOrderStatusDTO->statusName, '', $user);
-        $order->addStatusHistory($statusHistory);
-        $this->entityManager->persist($statusHistory);
-        $this->entityManager->flush();
-    }
-
     public function findOrder(int $orderId): Order
     {
         $order = $this->orderRepository->find($orderId);
