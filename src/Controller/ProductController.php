@@ -63,7 +63,9 @@ class ProductController extends AbstractController
     {
         try {
             $this->productService->assertProductDoesNotExist($productDTO->id);
-            $product = $this->productService->createProduct($productDTO);
+            $product = Product::createFromDTO($productDTO);
+            $this->entityManager->persist($product);
+            $this->entityManager->flush();
 
             return new JsonResponse(
                 ['message' => 'Product created successfully', 'id' => $product->getId()],
@@ -88,7 +90,8 @@ class ProductController extends AbstractController
     {
         try {
             $product = $this->productService->findProductOrFail($productDTO->id);
-            $this->productService->updateProduct($product, $productDTO);
+            $product->syncWithDTO($productDTO);
+            $this->entityManager->flush();
 
             return new JsonResponse(
                 ['message' => 'Product updated successfully'],

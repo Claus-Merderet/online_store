@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\DTO\CartDTO;
+use App\DTO\CartUpdateDTO;
 use App\Enum\ItemActionType;
 use App\Repository\CartRepository;
 use DateTime;
@@ -60,46 +62,47 @@ class Cart
         return $this->user;
     }
 
-    public function getUpdatedAt(): DateTimeInterface
-    {
-        return $this->updatedAt;
-    }
-
     public function setUpdatedAt(): void
     {
         $this->updatedAt = new DateTime();
     }
 
-    public function getCreatedAt(): DateTimeInterface
+    public function updateCartItemFromDTO(CartUpdateDTO $cartUpdateDTO): void
     {
-        return $this->createdAt;
-    }
-
-    public function updateCartItem(Product $product, int $quantity, ItemActionType $actionType): void
-    {
-        foreach ($this->cartItems as $existingItem) {
-            if ($existingItem->getProduct() === $product) {
-                if ($actionType === ItemActionType::ADD) {
-                    $existingItem->setQuantity($existingItem->getQuantity() + $quantity);
-
-                    return;
-                } elseif ($actionType === ItemActionType::REMOVE) {
-                    $newQuantity = $existingItem->getQuantity() - $quantity;
-                    if ($newQuantity < 1) {
-                        $this->cartItems->removeElement($existingItem);
-                    } else {
-                        $existingItem->setQuantity($newQuantity);
+        foreach ($cartUpdateDTO->cartItemUpdateDTO as $itemUpdateDTO) {
+            foreach ($this->cartItems as $existingItem) {
+                if ($existingItem->getProduct() === $itemUpdateDTO->product) {
+                    if ($itemUpdateDTO->action === ItemActionType::ADD) {
+                        $existingItem->setQuantity($existingItem->getQuantity() + $itemUpdateDTO->quantity);
+                    } elseif ($itemUpdateDTO->action === ItemActionType::REMOVE) {
+                        $newQuantity = $existingItem->getQuantity() - $itemUpdateDTO->quantity;
+                        if ($newQuantity < 1) {
+                            $this->cartItems->removeElement($existingItem);
+                        } else {
+                            $existingItem->setQuantity($newQuantity);
+                        }
                     }
-
-                    return;
+                } else {
+                    if ($itemUpdateDTO->action === ItemActionType::ADD) {
+                        $this->addCartItem($itemUpdateDTO->product, $itemUpdateDTO->quantity);
+                    } else {
+                        throw new RuntimeException('The product to be deleted was not found in the cart. ID: ' . $itemUpdateDTO->product->getId());
+                    }
                 }
             }
         }
-        if ($actionType === ItemActionType::ADD) {
-            $this->addCartItem($product, $quantity);
-        } else {
-            throw new RuntimeException('The product to be deleted was not found in the cart. ID: ' . $product->getId());
+        $this->setUpdatedAt();
+    }
+
+    public static function createFromDTO(CartDTO $cartDTO, User $user): self
+    {
+        $cart = new self($user);
+
+        foreach ($cartDTO->cartItem as $item) {
+            $cart->addCartItem($item->product, $item->quantity);
         }
+
+        return $cart;
     }
 
     public function addCartItem(Product $product, int $quantity): self
@@ -108,22 +111,5 @@ class Cart
         $this->cartItems[] = $cartItem;
 
         return $this;
-    }
-
-    public function removeCartItem(CartItem $cartItem): self
-    {
-        if ($this->cartItems->contains($cartItem)) {
-            $this->cartItems->removeElement($cartItem);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, CartItem>
-     */
-    public function getCartItems(): Collection
-    {
-        return $this->cartItems;
     }
 }

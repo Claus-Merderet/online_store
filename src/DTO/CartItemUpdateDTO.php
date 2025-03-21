@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
+use App\Entity\Product;
 use App\Enum\ItemActionType;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -16,6 +17,7 @@ class CartItemUpdateDTO
         public int $quantity,
         #[Assert\NotBlank(message: 'action is required.')]
         public ItemActionType $action,
+        public ?Product $product,
     ) {
     }
 }

@@ -6,18 +6,18 @@ namespace App\DataFixtures;
 
 use App\DTO\OrderDTO;
 use App\DTO\OrderProductDTO;
+use App\Entity\Order;
 use App\Entity\Product;
 use App\Entity\User;
 use App\Enum\DeliveryType;
 use App\Enum\NotificationType;
-use App\Factory\OrderFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
 class OrderFixtures extends Fixture implements DependentFixtureInterface
 {
-    public function __construct(private readonly OrderFactory $orderFactory)
+    public function __construct()
     {
     }
 
@@ -33,9 +33,9 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
     {
         for ($i = 0; $i < 3; $i++) {
             $user = $this->getReference(UserFixtures::USER_REFERENCE . $i, User::class);
-            $cartDTO = $this->createOrderDTO($i, $user->getPhone(), $user->getEmail());
-            $cart = $this->orderFactory->create($cartDTO, $user);
-            $manager->persist($cart);
+            $orderDTO = $this->createOrderDTO($i, $user->getPhone(), $user->getEmail());
+            $order = Order::createFromDTO($orderDTO, $user);
+            $manager->persist($order);
         }
 
         $manager->flush();

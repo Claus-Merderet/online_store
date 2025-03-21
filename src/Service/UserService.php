@@ -6,13 +6,14 @@ namespace App\Service;
 
 use App\DTO\RegisterUserDTO;
 use App\Entity\User;
-use App\Factory\UserFactory;
 use App\Repository\RoleRepository;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use RuntimeException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 readonly class UserService
 {
@@ -21,18 +22,20 @@ readonly class UserService
     public function __construct(
         private UserRepository $userRepository,
         private RoleRepository $roleRepository,
-        private UserFactory $userFactory,
         private JWTTokenManagerInterface $JWTTokenManager,
         private RefreshTokenGeneratorInterface $refreshTokenGenerator,
         private RefreshTokenManagerInterface $refreshTokenManager,
+        private EntityManagerInterface $entityManager,
+        private UserPasswordHasherInterface $passwordHasher,
     ) {
     }
 
     public function registerUser(RegisterUserDTO $registerUserDTO): User
     {
         $role = $this->roleRepository->getRoleUser();
-        $user = $this->userFactory->create($registerUserDTO, $role);
-        $this->userRepository->save($user);
+        $user = User::createFromDTO($registerUserDTO, $role, $this->passwordHasher);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
 
         return $user;
     }

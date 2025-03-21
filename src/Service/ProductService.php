@@ -7,9 +7,7 @@ namespace App\Service;
 use App\DTO\MeasurementsDTO;
 use App\DTO\ProductDTO;
 use App\Entity\Product;
-use App\Factory\ProductFactory;
 use App\Repository\ProductRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use RuntimeException;
 
@@ -18,9 +16,7 @@ readonly class ProductService
     private const PAGE_SIZE = 10;
 
     public function __construct(
-        private EntityManagerInterface $entityManager,
         private ProductRepository $productRepository,
-        private ProductFactory $productFactory,
     ) {
     }
 
@@ -37,23 +33,6 @@ readonly class ProductService
         if ($product === null) {
             throw new RuntimeException('A product with this id not found. ID: ' . $id);
         }
-
-        return $product;
-    }
-
-    public function createProduct(ProductDTO $productDTO): Product
-    {
-        $product = $this->productFactory->create($productDTO);
-        $this->entityManager->persist($product);
-        $this->entityManager->flush();
-
-        return $product;
-    }
-
-    public function updateProduct(Product $product, ProductDTO $productDTO): Product
-    {
-        $product->syncWithDTO($productDTO);
-        $this->entityManager->flush();
 
         return $product;
     }

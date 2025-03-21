@@ -19,12 +19,6 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
-    public function save(User $user): void
-    {
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-    }
-
     public function findOneByEmail(string $email): User|null
     {
         return $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);

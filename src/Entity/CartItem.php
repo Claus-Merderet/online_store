@@ -37,28 +37,9 @@ class CartItem
         $this->quantity = $quantity;
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function setId(int $id): self
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
     public function getProduct(): ?Product
     {
         return $this->product;
-    }
-
-    public function setProduct(Product $product): self
-    {
-        $this->product = $product;
-
-        return $this;
     }
 
     public function getQuantity(): ?int
@@ -71,17 +52,5 @@ class CartItem
         $this->quantity = $quantity;
 
         return $this;
-    }
-
-    public function setCart(Cart $cart): self
-    {
-        $this->cart = $cart;
-
-        return $this;
-    }
-
-    public function getCart(): ?Cart
-    {
-        return $this->cart;
     }
 }

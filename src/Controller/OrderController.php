@@ -7,12 +7,14 @@ namespace App\Controller;
 use App\DTO\OrderChangeStatusDTO;
 use App\DTO\OrderDTO;
 use App\DTO\OrderUpdateDTO;
+use App\Entity\Cart;
 use App\Entity\Order;
 use App\Entity\User;
 use App\Enum\RoleName;
 use App\Repository\OrderRepository;
 use App\Security\UserFetcher;
 use App\Service\OrderService;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
@@ -35,6 +37,7 @@ class OrderController extends AbstractController
         private readonly OrderRepository $orderRepository,
         private readonly SerializerInterface $serializer,
         private readonly UserFetcher $userFetcher,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -48,9 +51,18 @@ class OrderController extends AbstractController
     )] OrderDTO $orderDTO): JsonResponse
     {
         try {
-            $this->orderService->fillOrderProducts($orderDTO);
+            /* @var User $user */
+            $user = $this->getUser();
+            Assert::isInstanceOf($user, User::class, sprintf('Invalid user type %s', get_class($user)));
+            $this->orderService->fillOrderProductsInDTO($orderDTO->orderProductsDTO);
             $this->orderService->validateDTO($orderDTO);
-            $order = $this->orderService->createOrder($this->getUser(), $orderDTO);
+            $order = Order::createFromDTO($orderDTO, $user);
+            $this->entityManager->persist($order);
+            $cart = $this->entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
+            if ($cart instanceof Cart) {
+                $this->entityManager->remove($cart);
+            }
+            $this->entityManager->flush();
 
             return new JsonResponse(
                 ['message' => 'Order created successfully. ID: ' . $order->getId()],
@@ -118,6 +130,7 @@ class OrderController extends AbstractController
     {
         try {
             $order = $this->orderService->findOrder($changeOrderStatusDTO->orderId);
+            $user = $this->userFetcher->getAuthUser();
             /* @var User $user */
             Assert::isInstanceOf($user, User::class, sprintf('Invalid user type %s', get_class($user)));
             $order->addStatusHistory($changeOrderStatusDTO->statusName, $changeOrderStatusDTO->comment, $user);
@@ -140,7 +153,9 @@ class OrderController extends AbstractController
         #[MapEntity(id: 'id', message: 'The order does not exist')] Order $order,
     ): JsonResponse {
         try {
-            $order = $this->orderService->updateOrder($order, $updateOrderDTO);
+            $this->orderService->fillOrderProductsInDTO($updateOrderDTO->updateOrderItems);
+            $order->updateFromDTO($updateOrderDTO);
+            $this->entityManager->flush();
 
             return new JsonResponse(
                 $this->serializer->serialize($order, 'json', ['groups' => 'order:index']),

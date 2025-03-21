@@ -76,14 +76,16 @@ class User implements AuthUserInterface
     private ?Cart $cart = null;
 
     public function __construct(
-        RegisterUserDTO $registerUserDTO,
+        ?string $email,
+        ?string $phone,
+        ?string $promoId,
         Role $role,
         string $password,
         UserPasswordHasherInterface $passwordHasher,
     ) {
-        $this->email = $registerUserDTO->email ?? '';
-        $this->phone = $registerUserDTO->phone ?? '';
-        $this->promoId = $registerUserDTO->promoId ?? '';
+        $this->email = $email ?? '';
+        $this->phone = $phone ?? '';
+        $this->promoId = $promoId ?? '';
         $this->role = $role;
         $this->password = $passwordHasher->hashPassword($this, $password);
     }
@@ -91,18 +93,6 @@ class User implements AuthUserInterface
     public function getId(): int
     {
         return $this->id;
-    }
-
-    public function getRole(): ?Role
-    {
-        return $this->role;
-    }
-
-    public function setRole(?Role $role): static
-    {
-        $this->role = $role;
-
-        return $this;
     }
 
     public function getEmail(): string
@@ -115,19 +105,9 @@ class User implements AuthUserInterface
         return $this->password;
     }
 
-    public function setPassword(string $password, UserPasswordHasherInterface $passwordHasher): void
-    {
-        $this->password = $passwordHasher->hashPassword($this, $password);
-    }
-
     public function getPhone(): ?string
     {
         return $this->phone;
-    }
-
-    public function setPhone(?string $phone): void
-    {
-        $this->phone = $phone;
     }
 
     public function getRoles(): array
@@ -145,32 +125,18 @@ class User implements AuthUserInterface
         return !empty($this->email) ? $this->email : $this->phone;
     }
 
-    /**
-     * @param  Collection<int, UserAddresses> $userAddresses
-     */
-    public function setUserAddresses(Collection $userAddresses): void
-    {
-        $this->userAddresses = $userAddresses;
-    }
-
-    /**
-     * @param  Collection<int, Order> $orders
-     */
-    public function setOrders(Collection $orders): void
-    {
-        $this->orders = $orders;
-    }
-
-    /**
-     * @return   Collection<int, Order>
-     */
-    public function getOrders(): Collection
-    {
-        return $this->orders;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->name;
+    public static function createFromDTO(
+        RegisterUserDTO $registerUserDTO,
+        Role $role,
+        UserPasswordHasherInterface $passwordHasher,
+    ): self {
+        return new self(
+            $registerUserDTO->email,
+            $registerUserDTO->phone,
+            $registerUserDTO->promoId,
+            $role,
+            $registerUserDTO->password,
+            $passwordHasher,
+        );
     }
 }

@@ -10,6 +10,9 @@ parameters:
             -
                 message: '#Method .* has parameter .* with no value type specified in iterable type array.#'
                 path: src/Service/KafkaProducerService.php
+            -
+                message: '#Property .* is never written, only read.#'
+                path: src/Entity/
 services:
     -
         class: App\PHPStan\Rules\DeclareStrictTypesRule

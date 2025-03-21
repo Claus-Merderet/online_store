@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\DTO\OrderDTO;
+use App\DTO\OrderUpdateDTO;
 use App\Enum\DeliveryType;
+use App\Enum\ItemActionType;
 use App\Enum\NotificationType;
 use App\Enum\StatusName;
 use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use RuntimeException;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
@@ -71,6 +75,7 @@ class Order
         ?string $address,
         ?int $kladrId,
         ?string $userPhone,
+        ?string $userEmail,
         DeliveryType $deliveryType,
     ) {
         $this->notificationType = $notificationType;
@@ -78,27 +83,29 @@ class Order
         $this->address = $address;
         $this->kladrId = $kladrId;
         $this->userPhone = $userPhone;
+        $this->userEmail = $userEmail;
         $this->deliveryType = $deliveryType;
         $this->orderStatusHistories = new ArrayCollection();
         $this->orderProducts = new ArrayCollection();
     }
 
-    public static function create(
-        NotificationType $notificationType,
+    public static function createFromDTO(
+        OrderDTO $orderDTO,
         User $user,
-        ?string $address,
-        ?int $kladrId,
-        ?string $userPhone,
-        DeliveryType $deliveryType,
     ): self {
         $order = new self(
-            $notificationType,
+            $orderDTO->notificationType,
             $user,
-            $address,
-            $kladrId,
-            $userPhone,
-            $deliveryType,
+            $orderDTO->address,
+            $orderDTO->kladrId,
+            $orderDTO->userPhone,
+            $orderDTO->userEmail,
+            $orderDTO->deliveryType,
         );
+
+        foreach ($orderDTO->orderProductsDTO as $productDTO) {
+            $order->addProduct($productDTO->product, $productDTO->amount);
+        }
 
         $order->addStatusHistory(StatusName::REQUIRES_PAYMENT, '', $user);
 
@@ -116,104 +123,9 @@ class Order
         return $this->id;
     }
 
-    public function getNotificationType(): ?NotificationType
-    {
-        return $this->notificationType;
-    }
-
-    public function setNotificationType(NotificationType $notificationType): static
-    {
-        $this->notificationType = $notificationType;
-
-        return $this;
-    }
-
     public function getUser(): ?User
     {
         return $this->user;
-    }
-
-    public function setUser(?User $user): static
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    public function getAddress(): ?string
-    {
-        return $this->address;
-    }
-
-    public function setAddress(?string $address): static
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    public function getKladrId(): ?int
-    {
-        return $this->kladrId;
-    }
-
-    public function setKladrId(?int $kladrId): static
-    {
-        $this->kladrId = $kladrId;
-
-        return $this;
-    }
-
-    public function getUserPhone(): ?string
-    {
-        return $this->userPhone;
-    }
-
-    public function setUserPhone(?string $userPhone): static
-    {
-        $this->userPhone = $userPhone;
-
-        return $this;
-    }
-
-    public function getUserEmail(): ?string
-    {
-        return $this->userEmail;
-    }
-
-    public function setUserEmail(?string $userEmail): static
-    {
-        $this->userEmail = $userEmail;
-
-        return $this;
-    }
-
-    public function getDeliveryType(): ?DeliveryType
-    {
-        return $this->deliveryType;
-    }
-
-    public function setDeliveryType(DeliveryType $deliveryType): static
-    {
-        $this->deliveryType = $deliveryType;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, OrderStatusHistory>
-     */
-    public function getOrderStatusHistories(): Collection
-    {
-        return $this->orderStatusHistories;
-    }
-
-    /**
-     * @return Collection<int, OrderProducts>
-     */
-    public function getOrderProducts(): Collection
-    {
-        return $this->orderProducts;
     }
 
     public function addProduct(Product $product, int $amount): void
@@ -229,5 +141,31 @@ class Order
         }
 
         return $this;
+    }
+
+    public function updateFromDTO(OrderUpdateDTO $updateOrderDTO): void
+    {
+        foreach ($updateOrderDTO->updateOrderItems as $orderItemDTO) {
+            foreach ($this->orderProducts as $existingProduct) {
+                if ($existingProduct->getId() === $orderItemDTO->product->getId()) {
+                    if ($orderItemDTO->action === ItemActionType::ADD) {
+                        $existingProduct->setAmount($existingProduct->getAmount() + $orderItemDTO->quantity);
+                    } elseif ($orderItemDTO->action === ItemActionType::REMOVE) {
+                        $newQuantity = $existingProduct->getAmount() - $orderItemDTO->quantity;
+                        if ($newQuantity < 1) {
+                            $this->orderProducts->removeElement($existingProduct);
+                        } else {
+                            $existingProduct->setAmount($newQuantity);
+                        }
+                    }
+                } else {
+                    if ($orderItemDTO->action === ItemActionType::ADD) {
+                        $this->addProduct($orderItemDTO->product, $orderItemDTO->quantity);
+                    } else {
+                        throw new RuntimeException('The product to be deleted was not found in the order. ID: ' . $orderItemDTO->product->getId());
+                    }
+                }
+            }
+        }
     }
 }

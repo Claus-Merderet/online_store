@@ -6,16 +6,16 @@ namespace App\DataFixtures;
 
 use App\DTO\CartDTO;
 use App\DTO\CartItemDTO;
+use App\Entity\Cart;
 use App\Entity\Product;
 use App\Entity\User;
-use App\Factory\CartFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
 class CartFixtures extends Fixture implements DependentFixtureInterface
 {
-    public function __construct(private readonly CartFactory $cartFactory)
+    public function __construct()
     {
     }
 
@@ -32,7 +32,7 @@ class CartFixtures extends Fixture implements DependentFixtureInterface
         for ($i = 0; $i < 3; $i++) {
             $user = $this->getReference(UserFixtures::USER_REFERENCE . $i, User::class);
             $cartDTO = $this->createCartDTO($i);
-            $cart = $this->cartFactory->create($cartDTO, $user);
+            $cart = Cart::createFromDTO($cartDTO, $user);
             $manager->persist($cart);
         }
 

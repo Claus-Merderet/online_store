@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\DataFixtures;
 
 use App\DTO\ProductDTO;
-use App\Factory\ProductFactory;
+use App\Entity\Product;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -58,7 +58,6 @@ class ProductFixtures extends Fixture
     public const PRODUCT_REFERENCE = 'product-';
 
     public function __construct(
-        private readonly ProductFactory $productFactory,
         private readonly SerializerInterface $serializer,
     ) {
     }
@@ -71,7 +70,7 @@ class ProductFixtures extends Fixture
                 ProductDTO::class,
                 'json',
             );
-            $product = $this->productFactory->create($productDTO);
+            $product = Product::createFromDTO($productDTO);
             $manager->persist($product);
             $this->addReference(self::PRODUCT_REFERENCE . $index, $product);
         }

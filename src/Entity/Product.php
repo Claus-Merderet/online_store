@@ -58,23 +58,9 @@ class Product
         return $this->id;
     }
 
-    public function setId(int $id): static
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
     public function getName(): string
     {
         return $this->name;
-    }
-
-    public function setName(string $name): static
-    {
-        $this->name = $name;
-
-        return $this;
     }
 
     public function getWeight(): int
@@ -82,23 +68,9 @@ class Product
         return $this->weight;
     }
 
-    public function setWeight(int $weight): static
-    {
-        $this->weight = $weight;
-
-        return $this;
-    }
-
     public function getHeight(): int
     {
         return $this->height;
-    }
-
-    public function setHeight(int $height): static
-    {
-        $this->height = $height;
-
-        return $this;
     }
 
     public function getWidth(): int
@@ -106,23 +78,9 @@ class Product
         return $this->width;
     }
 
-    public function setWidth(int $width): static
-    {
-        $this->width = $width;
-
-        return $this;
-    }
-
     public function getLength(): int
     {
         return $this->length;
-    }
-
-    public function setLength(int $length): static
-    {
-        $this->length = $length;
-
-        return $this;
     }
 
     public function getDescription(): ?string
@@ -130,23 +88,9 @@ class Product
         return $this->description;
     }
 
-    public function setDescription(?string $description): static
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
     public function getPrice(): int
     {
         return $this->price;
-    }
-
-    public function setPrice(int $price): static
-    {
-        $this->price = $price;
-
-        return $this;
     }
 
     public function getTax(): int
@@ -154,22 +98,24 @@ class Product
         return $this->tax;
     }
 
-    public function setTax(int $tax): static
-    {
-        $this->tax = $tax;
-
-        return $this;
-    }
-
     public function getVersion(): int
     {
         return $this->version;
     }
 
-    public function setVersion(int $version): static
+    public static function createFromDTO(ProductDTO $productDTO): self
     {
-        $this->version = $version;
-
-        return $this;
+        return new self(
+            $productDTO->id,
+            $productDTO->name,
+            $productDTO->measurements->weight,
+            $productDTO->measurements->height,
+            $productDTO->measurements->width,
+            $productDTO->measurements->length,
+            $productDTO->description,
+            $productDTO->cost,
+            $productDTO->tax,
+            $productDTO->version,
+        );
     }
 }

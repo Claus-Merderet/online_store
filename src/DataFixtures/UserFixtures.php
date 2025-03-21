@@ -6,11 +6,12 @@ namespace App\DataFixtures;
 
 use App\DTO\RegisterUserDTO;
 use App\Entity\Role;
+use App\Entity\User;
 use App\Enum\RoleName;
-use App\Factory\UserFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixtures extends Fixture implements DependentFixtureInterface
 {
@@ -35,16 +36,16 @@ class UserFixtures extends Fixture implements DependentFixtureInterface
     public const USER_REFERENCE = 'user-';
 
     public function __construct(
-        private readonly UserFactory $userFactory,
+        private readonly UserPasswordHasherInterface $passwordHasher,
     ) {
     }
 
     public function load(ObjectManager $manager): void
     {
         foreach (self::getUsersData() as $index => $userData) {
-            $dto = $this->createRegisterUserDTO($userData);
+            $registerUserDTO = $this->createRegisterUserDTO($userData);
             $role = $this->getReference($userData['role'], Role::class);
-            $user = $this->userFactory->create($dto, $role);
+            $user = User::createFromDTO($registerUserDTO, $role, $this->passwordHasher);
             $manager->persist($user);
             $this->addReference(self::USER_REFERENCE . $index, $user);
         }

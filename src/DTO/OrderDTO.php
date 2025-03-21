@@ -8,7 +8,7 @@ use App\Enum\DeliveryType;
 use App\Enum\NotificationType;
 use Symfony\Component\Validator\Constraints as Assert;
 
-readonly class OrderDTO
+class OrderDTO
 {
     /**
      * @param OrderProductDTO[] $orderProductsDTO

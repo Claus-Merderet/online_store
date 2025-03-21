@@ -7,8 +7,8 @@ namespace App\Controller;
 use App\DTO\CartDTO;
 use App\DTO\CartUpdateDTO;
 use App\Entity\Cart;
+use App\Entity\User;
 use App\Enum\RoleName;
-use App\Factory\CartFactory;
 use App\Service\CartService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -22,12 +22,12 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
+use Webmozart\Assert\Assert;
 
 #[OA\Tag(name: 'Cart')]
 class CartController extends AbstractController
 {
     public function __construct(
-        private readonly CartFactory $cartFactory,
         private readonly EntityManagerInterface $entityManager,
         private readonly SerializerInterface $serializer,
         private readonly CartService $cartService,
@@ -64,10 +64,13 @@ class CartController extends AbstractController
         )] CartDTO $cartDTO,
     ): JsonResponse {
         try {
+            /* @var User $user */
             $user = $this->getUser();
-            $this->cartService->checkExistCart($this->getUser());
-            $this->cartService->fillProductsDTO($cartDTO);
-            $cart = $this->cartFactory->create($cartDTO, $user);
+            Assert::isInstanceOf($user, User::class, sprintf('Invalid user type %s', get_class($user)));
+            $this->cartService->checkExistCart($user);
+            $this->cartService->fillProductsInDTO($cartDTO->cartItem);
+            $cart = Cart::createFromDTO($cartDTO, $user);
+            $this->entityManager->persist($cart);
             $this->entityManager->flush();
         } catch (Exception $e) {
             return new JsonResponse(
@@ -112,7 +115,9 @@ class CartController extends AbstractController
     ): JsonResponse {
         try {
             $this->cartService->checkPermissions($cart->getUser() === $this->getUser(), $this->isGranted(RoleName::ADMIN->value));
-            $this->cartService->updateCart($cart, $cartUpdateDTO);
+            $this->cartService->fillProductsInDTO($cartUpdateDTO->cartItemUpdateDTO);
+            $cart->updateCartItemFromDTO($cartUpdateDTO);
+            $this->entityManager->flush();
             $cartData = $this->serializer->serialize($cart, 'json', ['groups' => 'cart']);
         } catch (Exception $e) {
             return new JsonResponse(

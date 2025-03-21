@@ -89,54 +89,6 @@ class OrderProducts //TODO убрать мн.ч
         return $this->id;
     }
 
-    public function getOrder(): ?Order
-    {
-        return $this->order;
-    }
-
-    public function setOrder(?Order $order): static
-    {
-        $this->order = $order;
-
-        return $this;
-    }
-
-    public function getProduct(): ?Product
-    {
-        return $this->product;
-    }
-
-    public function setProduct(?Product $product): static
-    {
-        $this->product = $product;
-
-        return $this;
-    }
-
-    public function getProductName(): ?string
-    {
-        return $this->productName;
-    }
-
-    public function setProductName(string $productName): static
-    {
-        $this->productName = $productName;
-
-        return $this;
-    }
-
-    public function getPrice(): ?int
-    {
-        return $this->price;
-    }
-
-    public function setPrice(int $price): static
-    {
-        $this->price = $price;
-
-        return $this;
-    }
-
     public function getAmount(): ?int
     {
         return $this->amount;
@@ -145,78 +97,6 @@ class OrderProducts //TODO убрать мн.ч
     public function setAmount(int $amount): static
     {
         $this->amount = $amount;
-
-        return $this;
-    }
-
-    public function getHeight(): ?int
-    {
-        return $this->height;
-    }
-
-    public function setHeight(int $height): static
-    {
-        $this->height = $height;
-
-        return $this;
-    }
-
-    public function getWeight(): ?int
-    {
-        return $this->weight;
-    }
-
-    public function setWeight(int $weight): static
-    {
-        $this->weight = $weight;
-
-        return $this;
-    }
-
-    public function getLength(): ?int
-    {
-        return $this->length;
-    }
-
-    public function setLength(int $length): static
-    {
-        $this->length = $length;
-
-        return $this;
-    }
-
-    public function getTax(): ?int
-    {
-        return $this->tax;
-    }
-
-    public function setTax(int $tax): static
-    {
-        $this->tax = $tax;
-
-        return $this;
-    }
-
-    public function getVersion(): ?int
-    {
-        return $this->version;
-    }
-
-    public function setVersion(int $version): static
-    {
-        $this->version = $version;
-
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): static
-    {
-        $this->description = $description;
 
         return $this;
     }
