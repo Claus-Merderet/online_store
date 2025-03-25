@@ -21,7 +21,7 @@ trait AuthTrait
             content: json_encode([
                 'identifier' => $identifier,
                 'password' => $password,
-            ])
+            ]),
         );
 
         return $client->getResponse();

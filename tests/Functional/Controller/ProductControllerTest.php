@@ -7,94 +7,74 @@ namespace App\Tests\Functional\Controller;
 use App\DataFixtures\UserFixtures;
 use App\Entity\Product;
 use App\Repository\ProductRepository;
-use App\Tests\Traits\AuthTrait;
+use App\Tests\Traits\ApiTestHelpersTrait;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
 class ProductControllerTest extends WebTestCase
 {
-    use AuthTrait;
+    use ApiTestHelpersTrait;
+
     private ProductRepository $productRepository;
+
     private KernelBrowser $client;
+
     protected function setUp(): void
     {
         $this->client = static::createClient();
         $this->productRepository = static::getContainer()->get(ProductRepository::class);
+        $this->authToken = $this->authenticateAndGetToken(UserFixtures::ADMIN_EMAIL, UserFixtures::ADMIN_PASSWORD);
     }
 
     public function testGetProductListSuccess(): void
     {
-        $this->client->request('GET', '/api/products');
-        $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
-        $responseData = json_decode($this->client->getResponse()->getContent(), true);
+        $response = $this->makeRequest('GET', '/api/products');
+        $responseData = $this->assertJsonResponse($response, Response::HTTP_OK);
         $this->assertNotEmpty($responseData['data'], 'Received an empty product list');
     }
 
     public function testCreateProductSuccess(): void
     {
-        $response = $this->authenticateUser($this->client, UserFixtures::ADMIN_EMAIL, UserFixtures::ADMIN_PASSWORD);
-        $responseData = json_decode($response->getContent(), true);
-        $jsonData = json_encode($this->createTestProductData());
-        $this->client->request(
-            method: 'POST',
-            uri: '/api/products',
-            server: [
-            'CONTENT_TYPE' => 'application/json',
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $responseData['token'],
-        ],
-            content: $jsonData
-        );
-
-        $responseData = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertEquals(Response::HTTP_CREATED, $this->client->getResponse()->getStatusCode());
+        $response = $this->makeRequest('POST', '/api/products', $this->createTestProductData());
+        $responseData = $this->assertJsonResponse($response, Response::HTTP_CREATED);
         $this->assertInstanceOf(
             Product::class,
             $this->productRepository->deleteById($responseData['id']),
-            'Created product not found'
+            'Created product not found',
         );
     }
 
     public function testUpdateProductSuccess(): void
     {
-        $response = $this->authenticateUser($this->client, UserFixtures::ADMIN_EMAIL, UserFixtures::ADMIN_PASSWORD);
-        $responseData = json_decode($response->getContent(), true);
-        $productArray = $this->productRepository->findByIdAsArray(1);
-        $jsonData = json_encode([
-            'id' => $productArray['id'],
-            'name' => $productArray['name'],
-            'measurements' => [
-                'weight' => $productArray['weight'],
-                'height' => $productArray['height'],
-                'width' => $productArray['width'],
-                'length' => $productArray['length'],
-            ],
-            'description' => $productArray['description'],
-            'cost' => $productArray['price'],
-            'tax' => $productArray['tax'],
-            'version' => $productArray['version'] + 1,
-        ]);
-        $this->client->request(
-            method: 'PUT',
-            uri: '/api/products',
-            server: [
-            'CONTENT_TYPE' => 'application/json',
-            'HTTP_AUTHORIZATION' => 'Bearer ' . $responseData['token'],
-        ],
-            content: $jsonData
-        );
-
-        $this->assertEquals(Response::HTTP_ACCEPTED, $this->client->getResponse()->getStatusCode());
+        $product = $this->productRepository->find(1);
+        $originalVersion = $product->getVersion();
+        $updateData = $this->createUpdateDataFromProduct($product);
+        $response = $this->makeRequest('PUT', '/api/products', $updateData);
+        $this->assertJsonResponse($response, Response::HTTP_ACCEPTED);
         $product = $this->productRepository->find(1);
         $this->assertEquals(
-            $productArray['version'] + 1,
+            $originalVersion + 1,
             $product->getVersion(),
-            'The version field is not updated'
+            'The version field is not updated',
         );
     }
 
     /**
-     * @return array{id: int, name: string, measurements: array{weight: int, height: int, width: int, length: int}, description: string, cost: int, tax: int, version: int}
+     * @return array{
+     *     id: int,
+     *     name: string,
+     *     measurements: array{
+     *          weight: int,
+     *          height: int,
+     *          width: int,
+     *          length: int
+     *      },
+     *     description: string,
+     *     cost: int,
+     *     tax: int,
+     *     version: int
+     * }
      */
     private function createTestProductData(): array
     {
@@ -111,6 +91,40 @@ class ProductControllerTest extends WebTestCase
             'cost' => 100,
             'tax' => 10,
             'version' => 1,
+        ];
+    }
+
+    /**
+     * @return array{
+     *     id: int,
+     *     name: string,
+     *     measurements: array{
+     *          weight: int,
+     *          height: int,
+     *          width: int,
+     *          length: int
+     *      },
+     *     description: null|string,
+     *     cost: int,
+     *     tax: int,
+     *     version: int
+     * }
+     */
+    private function createUpdateDataFromProduct(Product $product): array
+    {
+        return [
+            'id' => $product->getId(),
+            'name' => $product->getName(),
+            'measurements' => [
+                'weight' => $product->getWeight(),
+                'height' => $product->getHeight(),
+                'width' => $product->getWidth(),
+                'length' => $product->getLength(),
+            ],
+            'description' => $product->getDescription(),
+            'cost' => $product->getPrice(),
+            'tax' => $product->getTax(),
+            'version' => $product->getVersion() + 1,
         ];
     }
 }

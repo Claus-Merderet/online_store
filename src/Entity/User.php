@@ -24,7 +24,6 @@ class User implements AuthUserInterface
 {
     #[Assert\Uuid(message: 'Invalid promoId. It must be a valid UUID.')]
     #[ORM\Column(type: 'string', length: 36, nullable: true)]
-    #[Groups(['user:index'])]
     public ?string $promoId = null;
 
     #[ORM\Id]
@@ -110,6 +109,11 @@ class User implements AuthUserInterface
         return $this->phone;
     }
 
+    public function getRole(): Role
+    {
+        return $this->role;
+    }
+
     public function getRoles(): array
     {
         return [$this->role->getRoleName()];
@@ -138,5 +142,10 @@ class User implements AuthUserInterface
             $registerUserDTO->password,
             $passwordHasher,
         );
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
     }
 }

@@ -18,7 +18,7 @@ class Role
     private ?int $id = null;
 
     #[ORM\Column(length: 100, unique: true)]
-    #[Groups(['order:index'])]
+    #[Groups(['order:index','user:index'])]
     private string $roleName;
 
     public function __construct(string $roleName)
